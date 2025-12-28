@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    kotlin("plugin.serialization") version "1.9.20"
 }
 
 kotlin {
@@ -22,14 +23,11 @@ kotlin {
         browser()
     }
 
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-    }
-
     sourceSets {
         commonMain.dependencies {
-            // put your Multiplatform dependencies here
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+            // Koin Core
+            implementation("io.insert-koin:koin-core:3.5.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -38,7 +36,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.gma.school.gma_school.shared"
+    namespace = "com.gma.tsunjo.school.shared"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

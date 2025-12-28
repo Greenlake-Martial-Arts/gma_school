@@ -34,12 +34,6 @@ kotlin {
         binaries.executable()
     }
 
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -67,11 +61,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.gma.school.gma_school"
+    namespace = "com.gma.tsunjo.school"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.gma.school.gma_school"
+        applicationId = "com.gma.tsunjo.school"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -99,11 +93,11 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "com.gma.school.gma_school.MainKt"
+        mainClass = "com.gma.tsunjo.school.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.gma.school.gma_school"
+            packageName = "com.gma.tsunjo.school"
             packageVersion = "1.0.0"
         }
     }
