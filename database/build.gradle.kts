@@ -17,5 +17,7 @@ dependencies {
     // Shared models
     implementation(projects.shared)
     
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.20")
+    testImplementation(libs.kotlin.testJunit)
+    testImplementation(libs.h2)
+    testImplementation(libs.mockk)
 }
