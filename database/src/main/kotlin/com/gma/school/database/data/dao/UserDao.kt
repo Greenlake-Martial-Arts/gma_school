@@ -1,0 +1,95 @@
+// © 2025-2026 Hector Torres - Greenlake Martial Arts
+
+package com.gma.school.database.data.dao
+
+import com.gma.school.database.data.tables.UsersTable
+import com.gma.tsunjo.school.domain.models.User
+import java.time.LocalDateTime
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
+
+class UserDao {
+
+    fun findAll(): List<User> = transaction {
+        UsersTable.selectAll().map { rowToUser(it) }
+    }
+
+    fun findAllActive(): List<User> = transaction {
+        UsersTable.select { UsersTable.isActive eq true }.map { rowToUser(it) }
+    }
+
+    fun findById(id: Long): User? = transaction {
+        UsersTable.select { UsersTable.id eq id }
+            .map { rowToUser(it) }
+            .singleOrNull()
+    }
+
+    fun findByEmail(email: String): User? = transaction {
+        UsersTable.select { UsersTable.email eq email }
+            .map { rowToUser(it) }
+            .singleOrNull()
+    }
+
+    fun insert(email: String, passwordHash: String, fullName: String? = null): User? = transaction {
+        val insertStatement = UsersTable.insert {
+            it[UsersTable.email] = email
+            it[UsersTable.passwordHash] = passwordHash
+            it[UsersTable.fullName] = fullName
+            it[createdAt] = LocalDateTime.now()
+            it[updatedAt] = LocalDateTime.now()
+        }
+
+        val id = insertStatement[UsersTable.id].value
+        findById(id)
+    }
+
+    fun update(id: Long, email: String? = null, fullName: String? = null, isActive: Boolean? = null): User? =
+        transaction {
+            val updateCount = UsersTable.update({ UsersTable.id eq id }) {
+                email?.let { e -> it[UsersTable.email] = e }
+                fullName?.let { fn -> it[UsersTable.fullName] = fn }
+                isActive?.let { active -> it[UsersTable.isActive] = active }
+                it[updatedAt] = LocalDateTime.now()
+            }
+
+            if (updateCount > 0) findById(id) else null
+        }
+
+    fun authenticate(email: String, password: String): User? = transaction {
+        UsersTable.select {
+            (UsersTable.email eq email) and (UsersTable.isActive eq true)
+        }
+            .map { rowToUser(it) }
+            .singleOrNull()
+            ?.takeIf {
+                // In a real app, you'd verify the hashed password here
+                // For now, we'll assume password verification logic exists
+                verifyPassword(password, it.id)
+            }
+    }
+
+    private fun verifyPassword(password: String, userId: Long): Boolean = transaction {
+        // Simple password verification - in production use proper hashing
+        val storedHash = UsersTable.select { UsersTable.id eq userId }
+            .map { it[UsersTable.passwordHash] }
+            .singleOrNull()
+
+        // For demo purposes - in production use BCrypt or similar
+        storedHash == password
+    }
+
+    private fun rowToUser(row: ResultRow): User = User(
+        id = row[UsersTable.id].value,
+        email = row[UsersTable.email],
+        fullName = row[UsersTable.fullName],
+        studentId = row[UsersTable.studentId]?.value,
+        isActive = row[UsersTable.isActive],
+        createdAt = row[UsersTable.createdAt].toString(),
+        updatedAt = row[UsersTable.updatedAt].toString()
+    )
+}
