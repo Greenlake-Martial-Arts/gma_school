@@ -4,10 +4,10 @@ plugins {
     application
 }
 
-group = "com.gma.school.gma_school"
+group = "com.gma.tsunjo.school"
 version = "1.0.0"
 application {
-    mainClass.set("com.gma.school.gma_school.ApplicationKt")
+    mainClass.set("com.gma.tsunjo.school.ApplicationKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
@@ -15,9 +15,24 @@ application {
 
 dependencies {
     implementation(projects.shared)
+    implementation(projects.database)
     implementation(libs.logback)
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
+    implementation(libs.ktor.serverContentNegotiation)
+    implementation(libs.ktor.serverCompression)
+    implementation(libs.ktor.serializationKotlinxJson)
+    implementation(libs.ktor.serverHostJvm)
+    
+    // Configuration
+    implementation(libs.typesafe.config)
+    
+    // Koin for Ktor
+    implementation(libs.koin.ktor)
+    implementation(libs.koin.logger.slf4j)
+    
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.h2)
 }
