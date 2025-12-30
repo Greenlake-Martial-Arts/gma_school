@@ -99,11 +99,24 @@ jobs:
         run: ./gradlew build --info --stacktrace
 
       - name: Run targeted tests
-        run: ./gradlew ${{ steps.changes.outputs.modules }} --info
+        run: |
+          echo "Running tests for modules: ${{ steps.changes.outputs.modules }}"
+          ./gradlew ${{ steps.changes.outputs.modules }} --info
+
+      - name: Check for test results
+        id: test_check
+        run: |
+          if find . -name "*.xml" -path "*/build/test-results/test/*" | grep -q .; then
+            echo "test_files_exist=true" >> $GITHUB_OUTPUT
+            echo "Test result files found"
+          else
+            echo "test_files_exist=false" >> $GITHUB_OUTPUT
+            echo "No test result files found"
+          fi
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
-        if: always()
+        if: always() && steps.test_check.outputs.test_files_exist == 'true'
         with:
           name: Test Results
           path: '**/build/test-results/test/*.xml'
