@@ -2,6 +2,8 @@
 
 package com.gma.school.database.data.dao
 
+import com.gma.school.database.data.tables.RolesTable
+import com.gma.school.database.data.tables.UserRolesTable
 import com.gma.school.database.data.tables.UsersTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -10,6 +12,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -18,6 +21,7 @@ class UserDaoTest {
 
     private lateinit var database: Database
     private lateinit var userDao: UserDao
+    private lateinit var roleDao: RoleDao
 
     @Before
     fun setup() {
@@ -28,17 +32,18 @@ class UserDaoTest {
         )
 
         userDao = UserDao()
+        roleDao = RoleDao()
 
         // Create tables
         transaction(database) {
-            SchemaUtils.create(UsersTable)
+            SchemaUtils.create(UsersTable, RolesTable, UserRolesTable)
         }
     }
 
     @After
     fun teardown() {
         transaction(database) {
-            SchemaUtils.drop(UsersTable)
+            SchemaUtils.drop(UserRolesTable, RolesTable, UsersTable)
         }
     }
 
@@ -255,5 +260,81 @@ class UserDaoTest {
         assertTrue(retrievedUser.isActive)
         assertNotNull(retrievedUser.createdAt)
         assertNotNull(retrievedUser.updatedAt)
+    }
+
+    @Test
+    fun `addUserRole assigns role to user`() = transaction {
+        // Given
+        val user = userDao.insert("role@example.com", "hashedPassword", "Role Test")!!
+        val role = roleDao.insert("TEST_ROLE")!!
+
+        // When
+        val result = userDao.addUserRole(user.id, role.id)
+
+        // Then
+        assertTrue(result)
+    }
+
+    @Test
+    fun `addUserRole returns false for duplicate role assignment`() = transaction {
+        // Given
+        val user = userDao.insert("duplicate@example.com", "hashedPassword", "Duplicate Test")!!
+        val role = roleDao.insert("DUPLICATE_ROLE")!!
+        userDao.addUserRole(user.id, role.id)
+
+        // When
+        val result = userDao.addUserRole(user.id, role.id)
+
+        // Then
+        assertFalse(result)
+    }
+
+    @Test
+    fun `removeUserRole removes specific role from user`() = transaction {
+        // Given
+        val user = userDao.insert("remove@example.com", "hashedPassword", "Remove Test")!!
+        val role1 = roleDao.insert("ROLE_1")!!
+        val role2 = roleDao.insert("ROLE_2")!!
+        userDao.addUserRole(user.id, role1.id)
+        userDao.addUserRole(user.id, role2.id)
+
+        // When
+        val result = userDao.removeUserRole(user.id, role1.id)
+
+        // Then
+        assertTrue(result)
+    }
+
+    @Test
+    fun `replaceUserRoles replaces all user roles`() = transaction {
+        // Given
+        val user = userDao.insert("replace@example.com", "hashedPassword", "Replace Test")!!
+        val role1 = roleDao.insert("OLD_ROLE_1")!!
+        val role2 = roleDao.insert("OLD_ROLE_2")!!
+        val role3 = roleDao.insert("NEW_ROLE_1")!!
+        val role4 = roleDao.insert("NEW_ROLE_2")!!
+
+        userDao.addUserRole(user.id, role1.id)
+        userDao.addUserRole(user.id, role2.id)
+
+        // When
+        val result = userDao.replaceUserRoles(user.id, listOf(role3.id, role4.id))
+
+        // Then
+        assertTrue(result)
+    }
+
+    @Test
+    fun `replaceUserRoles with empty list removes all roles`() = transaction {
+        // Given
+        val user = userDao.insert("empty@example.com", "hashedPassword", "Empty Test")!!
+        val role = roleDao.insert("TEMP_ROLE")!!
+        userDao.addUserRole(user.id, role.id)
+
+        // When
+        val result = userDao.replaceUserRoles(user.id, emptyList())
+
+        // Then
+        assertTrue(result)
     }
 }

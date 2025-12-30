@@ -2,10 +2,17 @@
 
 package com.gma.tsunjo.school.domain.repositories
 
+import com.gma.school.database.data.dao.RoleDao
 import com.gma.school.database.data.dao.UserDao
+import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.models.User
 
-class UserRepository(private val userDao: UserDao) {
+class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao) {
+
+    private val defaultStudentRoleId by lazy {
+        roleDao.findByName("STUDENT")?.id
+            ?: throw AppException.RoleNotFound("STUDENT")
+    }
 
     fun getAllUsers(): List<User> = userDao.findAll()
 
@@ -15,11 +22,11 @@ class UserRepository(private val userDao: UserDao) {
 
     fun getUserByEmail(email: String): User? = userDao.findByEmail(email)
 
-    fun createUser(email: String, password: String, fullName: String? = null): Result<User> {
+    fun createUser(email: String, password: String, fullName: String? = null, roleId: Long? = null): Result<User> {
         return try {
             // Check if user already exists
             if (userDao.findByEmail(email) != null) {
-                return Result.failure(Exception("User with email $email already exists"))
+                return Result.failure(AppException.UserAlreadyExists(email))
             }
 
             // Simple password hashing (use proper hashing in production)
@@ -27,17 +34,48 @@ class UserRepository(private val userDao: UserDao) {
 
             val user = userDao.insert(email, passwordHash, fullName)
             if (user != null) {
+                // Assign role - default to STUDENT if not specified
+                val finalRoleId = roleId ?: defaultStudentRoleId
+                userDao.assignRole(user.id, finalRoleId)
                 Result.success(user)
             } else {
-                Result.failure(Exception("Failed to create user"))
+                Result.failure(AppException.DatabaseError("Failed to create user"))
             }
-        } catch (e: Exception) {
+        } catch (e: AppException) {
             Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(AppException.DatabaseError("Database error during user creation", e))
         }
     }
 
     fun updateUser(id: Long, email: String? = null, fullName: String? = null, isActive: Boolean? = null): User? {
         return userDao.update(id, email, fullName, isActive)
+    }
+
+    fun updateUserWithRoles(
+        id: Long,
+        email: String? = null,
+        fullName: String? = null,
+        isActive: Boolean? = null,
+        roleIds: List<Long>? = null
+    ): User? {
+        return try {
+            val user = userDao.update(id, email, fullName, isActive)
+            roleIds?.let { newRoleIds ->
+                userDao.replaceUserRoles(id, newRoleIds)
+            }
+            user
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun addUserRole(userId: Long, roleId: Long): Boolean {
+        return userDao.addUserRole(userId, roleId)
+    }
+
+    fun removeUserRole(userId: Long, roleId: Long): Boolean {
+        return userDao.removeUserRole(userId, roleId)
     }
 
     fun deactivateUser(id: Long): Boolean {
