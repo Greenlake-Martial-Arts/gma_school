@@ -87,8 +87,12 @@ jobs:
             MODULES=":server:test :database:test :shared:test :composeApp:test"
           fi
           
-          # If no modules detected or root files changed, test all
-          if [ -z "$MODULES" ]; then
+          # For PRs: If no specific modules detected, run all tests
+          if [ -z "$MODULES" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
+            MODULES=":server:test :database:test :shared:test :composeApp:test"
+            echo "No specific modules detected for PR - running all tests"
+          elif [ -z "$MODULES" ]; then
+            # For pushes: only run tests if there are actual changes
             MODULES=":server:test :database:test :shared:test :composeApp:test"
           fi
           
