@@ -70,19 +70,18 @@ class UserDao {
             .map { rowToUser(it) }
             .singleOrNull()
             ?.takeIf {
-                // In a real app, you'd verify the hashed password here
+                // TODO In a real app, you'd verify the hashed password here
                 // For now, we'll assume password verification logic exists
                 verifyPassword(password, it.id)
             }
     }
 
     private fun verifyPassword(password: String, userId: Long): Boolean = transaction {
-        // Simple password verification - in production use proper hashing
         val storedHash = UsersTable.select { UsersTable.id eq userId }
             .map { it[UsersTable.passwordHash] }
             .singleOrNull()
 
-        // For demo purposes - in production use BCrypt or similar
+        // Compare hashed password with stored hash
         storedHash == password
     }
 

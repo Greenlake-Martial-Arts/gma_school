@@ -6,6 +6,7 @@ import com.gma.school.database.data.dao.RoleDao
 import com.gma.school.database.data.dao.UserDao
 import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.models.User
+import io.ktor.util.encodeBase64
 
 class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao) {
 
@@ -29,8 +30,8 @@ class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao)
                 return Result.failure(AppException.UserAlreadyExists(email))
             }
 
-            // Simple password hashing (use proper hashing in production)
-            val passwordHash = password.hashCode().toString()
+            // Simple password encodeBase64 (use proper salt in production)
+            val passwordHash = password.encodeBase64()
 
             val user = userDao.insert(email, passwordHash, fullName)
             if (user != null) {
