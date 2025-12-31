@@ -90,10 +90,10 @@ jobs:
             MODULES=":server:test :shared:test :composeApp:test"
           fi
           
-          # For PRs: If no specific modules detected, run all tests
+          # For PRs: If no specific modules detected, run all tests (except database)
           if [ -z "$MODULES" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
             MODULES=":server:test :shared:test :composeApp:test"
-            echo "No specific modules detected for PR - running all tests"
+            echo "No specific modules detected for PR - running all tests (except database)"
           elif [ -z "$MODULES" ]; then
             # For pushes: only run tests if there are actual changes
             MODULES=":server:test :shared:test :composeApp:test"
