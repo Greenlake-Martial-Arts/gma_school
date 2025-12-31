@@ -1,0 +1,48 @@
+name: GMA School PR Check
+
+on:
+  pull_request:
+    branches: ["main", "develop"]
+  push:
+    branches: ["main", "develop"]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run tests
+        run: ./gradlew :server:test :database:test :shared:test :composeApp:test
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: '**/build/test-results/test/TEST-*.xml'
+          reporter: java-junit
+        continue-on-error: true
+
+      - name: Upload test results (fallback)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: '**/build/test-results/test/TEST-*.xml'

@@ -4,15 +4,15 @@ plugins {
 
 dependencies {
     // Exposed ORM
-    implementation("org.jetbrains.exposed:exposed-core:0.45.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.45.0")
-    implementation("org.jetbrains.exposed:exposed-java-time:0.45.0")
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.java.time)
     
     // MySQL driver
-    implementation("mysql:mysql-connector-java:8.0.33")
+    implementation(libs.mysql.connector)
     
     // Connection pooling
-    implementation("com.zaxxer:HikariCP:5.0.1")
+    implementation(libs.hikaricp)
     
     // Shared models
     implementation(projects.shared)
