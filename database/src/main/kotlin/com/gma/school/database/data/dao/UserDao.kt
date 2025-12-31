@@ -6,6 +6,7 @@ import com.gma.school.database.data.tables.UserRolesTable
 import com.gma.school.database.data.tables.UsersTable
 import com.gma.tsunjo.school.domain.models.User
 import java.time.LocalDateTime
+import java.util.Base64
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
@@ -81,8 +82,8 @@ class UserDao {
             .map { it[UsersTable.passwordHash] }
             .singleOrNull()
 
-        // Compare hashed password with stored hash
-        storedHash == password
+        // Compare base64 encoded password with stored hash
+        storedHash == Base64.getEncoder().encodeToString(password.toByteArray())
     }
 
     private fun rowToUser(row: ResultRow): User = User(

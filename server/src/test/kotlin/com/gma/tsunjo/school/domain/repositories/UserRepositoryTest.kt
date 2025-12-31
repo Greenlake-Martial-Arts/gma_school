@@ -10,6 +10,7 @@ import com.gma.tsunjo.school.domain.models.User
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.Base64
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -103,7 +104,13 @@ class UserRepositoryTest {
     fun `createUser succeeds when email is unique`() {
         // Given
         every { userDao.findByEmail("new@example.com") } returns null
-        every { userDao.insert("new@example.com", "password".hashCode().toString(), "New User") } returns testUser
+        every {
+            userDao.insert(
+                "new@example.com",
+                Base64.getEncoder().encodeToString("password".toByteArray()),
+                "New User"
+            )
+        } returns testUser
         every { roleDao.findByName("STUDENT") } returns Role(4L, "STUDENT")
         every { userDao.assignRole(testUser.id, 4L) } returns true
 
@@ -114,7 +121,13 @@ class UserRepositoryTest {
         assertTrue(result.isSuccess)
         assertEquals(testUser, result.getOrNull())
         verify { userDao.findByEmail("new@example.com") }
-        verify { userDao.insert("new@example.com", "password".hashCode().toString(), "New User") }
+        verify {
+            userDao.insert(
+                "new@example.com",
+                Base64.getEncoder().encodeToString("password".toByteArray()),
+                "New User"
+            )
+        }
         verify { userDao.assignRole(testUser.id, 4L) }
     }
 
@@ -139,7 +152,13 @@ class UserRepositoryTest {
     fun `createUser fails when dao insert returns null`() {
         // Given
         every { userDao.findByEmail("test@example.com") } returns null
-        every { userDao.insert("test@example.com", "password".hashCode().toString(), "Test User") } returns null
+        every {
+            userDao.insert(
+                "test@example.com",
+                Base64.getEncoder().encodeToString("password".toByteArray()),
+                "Test User"
+            )
+        } returns null
 
         // When
         val result = userRepository.createUser("test@example.com", "password", "Test User")
@@ -334,7 +353,7 @@ class UserRepositoryTest {
         every {
             userDao.insert(
                 "student@example.com",
-                "password".hashCode().toString(),
+                Base64.getEncoder().encodeToString("password".toByteArray()),
                 "Student User"
             )
         } returns testUser
@@ -357,7 +376,7 @@ class UserRepositoryTest {
         every {
             userDao.insert(
                 "student@example.com",
-                "password".hashCode().toString(),
+                Base64.getEncoder().encodeToString("password".toByteArray()),
                 "Student User"
             )
         } returns testUser

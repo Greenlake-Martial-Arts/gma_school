@@ -5,6 +5,7 @@ package com.gma.school.database.data.dao
 import com.gma.school.database.data.tables.RolesTable
 import com.gma.school.database.data.tables.UserRolesTable
 import com.gma.school.database.data.tables.UsersTable
+import java.util.Base64
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -198,8 +199,9 @@ class UserDaoTest {
 
     @Test
     fun `authenticate returns user with valid credentials for active user`() {
+        val passwordHash = Base64.getEncoder().encodeToString("password".toByteArray())
         // Given
-        userDao.insert("test@example.com", "password", "Test User")
+        userDao.insert("test@example.com", passwordHash, "Test User")
 
         // When
         val authenticatedUser = userDao.authenticate("test@example.com", "password")
