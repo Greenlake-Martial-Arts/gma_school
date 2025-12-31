@@ -8,5 +8,6 @@ import kotlinx.serialization.Serializable
 data class CreateUserRequest(
     val email: String,
     val password: String,
-    val fullName: String? = null
+    val fullName: String? = null,
+    val roleId: Long? = null
 )

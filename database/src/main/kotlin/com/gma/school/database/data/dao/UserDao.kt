@@ -2,11 +2,15 @@
 
 package com.gma.school.database.data.dao
 
+import com.gma.school.database.data.tables.UserRolesTable
 import com.gma.school.database.data.tables.UsersTable
 import com.gma.tsunjo.school.domain.models.User
 import java.time.LocalDateTime
+import java.util.Base64
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
@@ -67,20 +71,19 @@ class UserDao {
             .map { rowToUser(it) }
             .singleOrNull()
             ?.takeIf {
-                // In a real app, you'd verify the hashed password here
+                // TODO In a real app, you'd verify the hashed password here
                 // For now, we'll assume password verification logic exists
                 verifyPassword(password, it.id)
             }
     }
 
     private fun verifyPassword(password: String, userId: Long): Boolean = transaction {
-        // Simple password verification - in production use proper hashing
         val storedHash = UsersTable.select { UsersTable.id eq userId }
             .map { it[UsersTable.passwordHash] }
             .singleOrNull()
 
-        // For demo purposes - in production use BCrypt or similar
-        storedHash == password
+        // Compare base64 encoded password with stored hash
+        storedHash == Base64.getEncoder().encodeToString(password.toByteArray())
     }
 
     private fun rowToUser(row: ResultRow): User = User(
@@ -92,4 +95,57 @@ class UserDao {
         createdAt = row[UsersTable.createdAt].toString(),
         updatedAt = row[UsersTable.updatedAt].toString()
     )
+
+    fun assignRole(userId: Long, roleId: Long): Boolean = transaction {
+        try {
+            UserRolesTable.insert {
+                it[UserRolesTable.userId] = userId
+                it[UserRolesTable.roleId] = roleId
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun addUserRole(userId: Long, roleId: Long): Boolean = transaction {
+        try {
+            UserRolesTable.insert {
+                it[UserRolesTable.userId] = userId
+                it[UserRolesTable.roleId] = roleId
+            }
+            true
+        } catch (e: Exception) {
+            // Role already exists for user - that's ok
+            false
+        }
+    }
+
+    fun removeUserRole(userId: Long, roleId: Long): Boolean = transaction {
+        try {
+            UserRolesTable.deleteWhere {
+                (UserRolesTable.userId eq userId) and (UserRolesTable.roleId eq roleId)
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun replaceUserRoles(userId: Long, roleIds: List<Long>): Boolean = transaction {
+        try {
+            // Remove all existing roles
+            UserRolesTable.deleteWhere { UserRolesTable.userId eq userId }
+            // Add new roles
+            roleIds.forEach { roleId ->
+                UserRolesTable.insert {
+                    it[UserRolesTable.userId] = userId
+                    it[UserRolesTable.roleId] = roleId
+                }
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

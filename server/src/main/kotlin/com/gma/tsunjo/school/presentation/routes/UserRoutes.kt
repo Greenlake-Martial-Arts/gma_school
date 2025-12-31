@@ -6,6 +6,7 @@ import com.gma.tsunjo.school.api.requests.CreateUserRequest
 import com.gma.tsunjo.school.api.requests.LoginRequest
 import com.gma.tsunjo.school.api.requests.UpdateUserRequest
 import com.gma.tsunjo.school.domain.repositories.UserRepository
+import com.gma.tsunjo.school.presentation.extensions.respondWithError
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -92,13 +93,14 @@ fun Route.createUser(logger: Logger) {
         userRepository.createUser(
             email = request.email,
             password = request.password,
-            fullName = request.fullName
+            fullName = request.fullName,
+            roleId = request.roleId
         ).fold(
             onSuccess = { user ->
                 call.respond(HttpStatusCode.Created, user)
             },
             onFailure = { error ->
-                call.respond(HttpStatusCode.Conflict, error.message ?: "Failed to create user")
+                call.respondWithError(error)
             }
         )
     }
