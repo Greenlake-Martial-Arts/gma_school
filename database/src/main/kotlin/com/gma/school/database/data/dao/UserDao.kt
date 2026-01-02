@@ -33,17 +33,16 @@ class UserDao {
             .singleOrNull()
     }
 
-    fun findByEmail(email: String): User? = transaction {
-        UsersTable.select { UsersTable.email eq email }
+    fun findByUsername(username: String): User? = transaction {
+        UsersTable.select { UsersTable.username eq username }
             .map { rowToUser(it) }
             .singleOrNull()
     }
 
-    fun insert(email: String, passwordHash: String, fullName: String? = null): User? = transaction {
+    fun insert(username: String, passwordHash: String): User? = transaction {
         val insertStatement = UsersTable.insert {
-            it[UsersTable.email] = email
+            it[UsersTable.username] = username
             it[UsersTable.passwordHash] = passwordHash
-            it[UsersTable.fullName] = fullName
             it[createdAt] = LocalDateTime.now()
             it[updatedAt] = LocalDateTime.now()
         }
@@ -52,11 +51,10 @@ class UserDao {
         findById(id)
     }
 
-    fun update(id: Long, email: String? = null, fullName: String? = null, isActive: Boolean? = null): User? =
+    fun update(id: Long, username: String? = null, isActive: Boolean? = null): User? =
         transaction {
             val updateCount = UsersTable.update({ UsersTable.id eq id }) {
-                email?.let { e -> it[UsersTable.email] = e }
-                fullName?.let { fn -> it[UsersTable.fullName] = fn }
+                username?.let { u -> it[UsersTable.username] = u }
                 isActive?.let { active -> it[UsersTable.isActive] = active }
                 it[updatedAt] = LocalDateTime.now()
             }
@@ -64,9 +62,9 @@ class UserDao {
             if (updateCount > 0) findById(id) else null
         }
 
-    fun authenticate(email: String, password: String): User? = transaction {
+    fun authenticate(username: String, password: String): User? = transaction {
         UsersTable.select {
-            (UsersTable.email eq email) and (UsersTable.isActive eq true)
+            (UsersTable.username eq username) and (UsersTable.isActive eq true)
         }
             .map { rowToUser(it) }
             .singleOrNull()
@@ -88,8 +86,7 @@ class UserDao {
 
     private fun rowToUser(row: ResultRow): User = User(
         id = row[UsersTable.id].value,
-        email = row[UsersTable.email],
-        fullName = row[UsersTable.fullName],
+        username = row[UsersTable.username],
         isActive = row[UsersTable.isActive],
         createdAt = row[UsersTable.createdAt].toString(),
         updatedAt = row[UsersTable.updatedAt].toString()

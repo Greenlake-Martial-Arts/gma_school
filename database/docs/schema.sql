@@ -32,13 +32,12 @@ CREATE TABLE roles (
 
 CREATE TABLE users (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Users (login credentials)',
-    email         VARCHAR(255) NOT NULL UNIQUE,
+    username      VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    full_name     VARCHAR(200) DEFAULT NULL,
     is_active     TINYINT(1) NOT NULL DEFAULT '1',
     created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    KEY idx_user_email (email)
+    KEY idx_user_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE user_roles (
