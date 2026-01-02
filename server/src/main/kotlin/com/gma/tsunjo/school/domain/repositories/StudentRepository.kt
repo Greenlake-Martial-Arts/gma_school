@@ -25,7 +25,7 @@ class StudentRepository(
         externalCode: String?,
         firstName: String,
         lastName: String,
-        email: String?,
+        email: String,
         phone: String?,
         memberTypeId: Long
     ): Result<Student> {

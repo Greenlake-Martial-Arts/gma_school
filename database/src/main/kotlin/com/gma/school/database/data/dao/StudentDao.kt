@@ -45,7 +45,7 @@ class StudentDao {
         externalCode: String?,
         firstName: String,
         lastName: String,
-        email: String?,
+        email: String,
         phone: String?,
         memberTypeId: Long
     ): Student? = transaction {

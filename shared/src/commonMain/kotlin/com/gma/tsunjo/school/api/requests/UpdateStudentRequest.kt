@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UpdateStudentRequest(
     val externalCode: String? = null,
-    val firstName: String? = null,
-    val lastName: String? = null,
-    val email: String? = null,
+    val firstName: String,
+    val lastName: String,
+    val email: String,
     val phone: String? = null,
     val memberTypeId: Long? = null,
     val isActive: Boolean? = null

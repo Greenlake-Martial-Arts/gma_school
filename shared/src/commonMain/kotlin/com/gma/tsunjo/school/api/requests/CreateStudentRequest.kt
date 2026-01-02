@@ -9,7 +9,7 @@ data class CreateStudentRequest(
     val externalCode: String? = null,
     val firstName: String,
     val lastName: String,
-    val email: String? = null,
+    val email: String,
     val phone: String? = null,
     val memberTypeId: Long
 )

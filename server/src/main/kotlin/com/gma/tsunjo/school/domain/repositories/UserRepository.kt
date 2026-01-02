@@ -21,19 +21,19 @@ class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao)
 
     fun getUserById(id: Long): User? = userDao.findById(id)
 
-    fun getUserByEmail(email: String): User? = userDao.findByEmail(email)
+    fun getUserByUsername(username: String): User? = userDao.findByUsername(username)
 
-    fun createUser(email: String, password: String, fullName: String? = null, roleId: Long? = null): Result<User> {
+    fun createUser(username: String, password: String, roleId: Long? = null): Result<User> {
         return try {
             // Check if user already exists
-            if (userDao.findByEmail(email) != null) {
-                return Result.failure(AppException.UserAlreadyExists(email))
+            if (userDao.findByUsername(username) != null) {
+                return Result.failure(AppException.UserAlreadyExists(username))
             }
 
             // Simple password encodeBase64 (use proper salt in production)
             val passwordHash = Base64.getEncoder().encodeToString(password.toByteArray())
 
-            val user = userDao.insert(email, passwordHash, fullName)
+            val user = userDao.insert(username, passwordHash)
             if (user != null) {
                 // Assign role - default to STUDENT if not specified
                 val finalRoleId = roleId ?: defaultStudentRoleId
@@ -49,19 +49,18 @@ class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao)
         }
     }
 
-    fun updateUser(id: Long, email: String? = null, fullName: String? = null, isActive: Boolean? = null): User? {
-        return userDao.update(id, email, fullName, isActive)
+    fun updateUser(id: Long, username: String? = null, isActive: Boolean? = null): User? {
+        return userDao.update(id, username, isActive)
     }
 
     fun updateUserWithRoles(
         id: Long,
-        email: String? = null,
-        fullName: String? = null,
+        username: String? = null,
         isActive: Boolean? = null,
         roleIds: List<Long>? = null
     ): User? {
         return try {
-            val user = userDao.update(id, email, fullName, isActive)
+            val user = userDao.update(id, username, isActive)
             roleIds?.let { newRoleIds ->
                 userDao.replaceUserRoles(id, newRoleIds)
             }
@@ -84,7 +83,7 @@ class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao)
         return updated != null
     }
 
-    fun authenticateUser(email: String, password: String): User? {
-        return userDao.authenticate(email, password)
+    fun authenticateUser(username: String, password: String): User? {
+        return userDao.authenticate(username, password)
     }
 }

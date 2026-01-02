@@ -10,7 +10,7 @@ object StudentsTable : LongIdTable("students") {
     val externalCode = varchar("external_code", 30).nullable().uniqueIndex()
     val firstName = varchar("first_name", 100)
     val lastName = varchar("last_name", 100)
-    val email = varchar("email", 255).nullable().uniqueIndex()
+    val email = varchar("email", 255).uniqueIndex()
     val phone = varchar("phone", 30).nullable()
     val memberTypeId = reference("member_type_id", MemberTypesTable)
     val isActive = bool("is_active").default(true)

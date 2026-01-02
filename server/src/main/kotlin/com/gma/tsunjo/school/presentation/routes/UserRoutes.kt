@@ -92,9 +92,8 @@ fun Route.createUser(logger: Logger) {
         val request = call.receive<CreateUserRequest>()
 
         userRepository.createUser(
-            email = request.email,
+            username = request.username,
             password = request.password,
-            fullName = request.fullName,
             roleId = request.roleId
         ).fold(
             onSuccess = { user ->
@@ -122,8 +121,7 @@ fun Route.updateUser(logger: Logger) {
         val request = call.receive<UpdateUserRequest>()
         val user = userRepository.updateUser(
             id = id,
-            email = request.email,
-            fullName = request.fullName,
+            username = request.username,
             isActive = request.isActive
         )
 
@@ -184,7 +182,7 @@ fun Route.loginUser(logger: Logger) {
         logger.debug("POST /auth/login")
         val request = call.receive<LoginRequest>()
 
-        val user = userRepository.authenticateUser(request.email, request.password)
+        val user = userRepository.authenticateUser(request.username, request.password)
         if (user != null) {
             call.respond(HttpStatusCode.OK, user)
         } else {

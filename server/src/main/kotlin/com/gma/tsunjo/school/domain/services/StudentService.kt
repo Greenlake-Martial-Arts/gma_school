@@ -17,23 +17,14 @@ class StudentService(
         externalCode: String?,
         firstName: String,
         lastName: String,
-        email: String?,
+        email: String,
         phone: String?,
         memberTypeId: Long
     ): Result<Student> {
         return try {
             // Create user first (required for every student)
-            val userResult = if (email != null) {
-                val tempPassword = UUID.randomUUID().toString().substring(0, 8)
-                val fullName = "$firstName $lastName"
-                userRepository.createUser(email, tempPassword, fullName)
-            } else {
-                // Create user without email for students who don't need login
-                val tempEmail = "student_${System.currentTimeMillis()}@temp.local"
-                val tempPassword = UUID.randomUUID().toString().substring(0, 8)
-                val fullName = "$firstName $lastName"
-                userRepository.createUser(tempEmail, tempPassword, fullName)
-            }
+            val tempPassword = UUID.randomUUID().toString().substring(0, 8)
+            val userResult = userRepository.createUser(email, tempPassword)
 
             if (userResult.isFailure) {
                 return Result.failure(
@@ -55,7 +46,7 @@ class StudentService(
         externalCode: String? = null,
         firstName: String? = null,
         lastName: String? = null,
-        email: String? = null,
+        email: String,
         phone: String? = null,
         memberTypeId: Long? = null,
         isActive: Boolean? = null
@@ -63,15 +54,9 @@ class StudentService(
         val updatedStudent =
             studentRepository.updateStudent(id, externalCode, firstName, lastName, email, phone, memberTypeId, isActive)
 
-        // Update associated user's fullName and email if changed
-        if (updatedStudent != null && (firstName != null || lastName != null || email != null)) {
-            val newFullName = if (firstName != null || lastName != null) {
-                "${updatedStudent.firstName} ${updatedStudent.lastName}"
-            } else null
-            
-            val newEmail = email
-            
-            userRepository.updateUser(updatedStudent.userId, email = newEmail, fullName = newFullName)
+        // Update associated user's username if email provided (UI always sends current email)
+        if (updatedStudent != null) {
+            userRepository.updateUser(updatedStudent.userId, username = email)
         }
 
         return updatedStudent

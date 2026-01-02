@@ -11,7 +11,7 @@ data class Student(
     val externalCode: String?,
     val firstName: String,
     val lastName: String,
-    val email: String?,
+    val email: String,
     val phone: String?,
     val memberTypeId: Long,
     val isActive: Boolean,
