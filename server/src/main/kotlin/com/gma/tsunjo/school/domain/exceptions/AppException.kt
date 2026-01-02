@@ -8,4 +8,6 @@ sealed class AppException(message: String, cause: Throwable? = null) : Exception
     class RoleNotFound(name: String) : AppException("Role '$name' not found")
     class ValidationError(message: String) : AppException(message)
     class DatabaseError(message: String, cause: Throwable? = null) : AppException(message, cause)
+    class StudentAlreadyExists(message: String) : AppException(message)
+    class MemberTypeNotFound(id: Long) : AppException("Member type with id '$id' not found")
 }

@@ -27,11 +27,37 @@ CREATE TABLE roles (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==============================================================
+-- AUTHENTICATION
+-- ==============================================================
+
+CREATE TABLE users (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Users (login credentials)',
+    email         VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name     VARCHAR(200) DEFAULT NULL,
+    is_active     TINYINT(1) NOT NULL DEFAULT '1',
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_user_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE user_roles (
+    user_id BIGINT NOT NULL COMMENT 'Bridge table: which user has which role(s)',
+    role_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    KEY fk_ur_role (role_id),
+    CONSTRAINT fk_ur_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ur_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ==============================================================
 -- CORE ENTITIES
 -- ==============================================================
 
 CREATE TABLE students (
     id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id        BIGINT NOT NULL UNIQUE COMMENT 'Every student must have a user account',
     external_code  VARCHAR(30) UNIQUE,
     first_name     VARCHAR(100) NOT NULL,
     last_name      VARCHAR(100) NOT NULL,
@@ -43,8 +69,11 @@ CREATE TABLE students (
     updated_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_student_active (is_active),
     KEY idx_student_external (external_code),
+    KEY fk_student_user (user_id),
     KEY fk_student_member_type (member_type_id),
-    CONSTRAINT fk_student_member_type FOREIGN KEY (member_type_id) 
+    CONSTRAINT fk_student_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_student_member_type FOREIGN KEY (member_type_id)
         REFERENCES member_types(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -67,7 +96,7 @@ CREATE TABLE moves (
     created_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY fk_moves_move_categories1_idx (move_categories_id),
-    CONSTRAINT fk_moves_move_categories1 FOREIGN KEY (move_categories_id) 
+    CONSTRAINT fk_moves_move_categories1 FOREIGN KEY (move_categories_id)
         REFERENCES move_categories(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -133,33 +162,6 @@ CREATE TABLE student_progress (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==============================================================
--- AUTHENTICATION
--- ==============================================================
-
-CREATE TABLE users (
-    id            BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Users (login credentials)',
-    email         VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    full_name     VARCHAR(200) DEFAULT NULL,
-    student_id    BIGINT DEFAULT NULL,
-    is_active     TINYINT(1) NOT NULL DEFAULT '1',
-    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    KEY fk_user_student (student_id),
-    KEY idx_user_email (email),
-    CONSTRAINT fk_user_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE user_roles (
-    user_id BIGINT NOT NULL COMMENT 'Bridge table: which user has which role(s)',
-    role_id BIGINT NOT NULL,
-    PRIMARY KEY (user_id, role_id),
-    KEY fk_ur_role (role_id),
-    CONSTRAINT fk_ur_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_ur_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ==============================================================
 -- AUDIT LOG
 -- ==============================================================
 
@@ -181,8 +183,17 @@ CREATE TABLE audit_log (
 -- ============================================================================
 
 -- Default roles
-INSERT INTO roles (name) VALUES 
+INSERT INTO roles (name) VALUES
 ('ADMIN'),
-('INSTRUCTOR'), 
+('INSTRUCTOR'),
 ('DIRECTOR'),
 ('STUDENT');
+
+-- Default member types
+INSERT INTO member_types (name) VALUES
+('Regular'),
+('Prospect'),
+('Women\'s self defense'),
+('Instructor'),
+('Workshop'),
+('Parent');
