@@ -34,6 +34,7 @@ fun Application.userRoutes() {
             createUser(logger)
             updateUser(logger)
             deactivateUser(logger)
+            activateUser(logger)
         }
 
         route("/auth") {
@@ -146,9 +147,30 @@ fun Route.deactivateUser(logger: Logger) {
             return@patch
         }
 
-        val deactivated = userRepository.deactivateUser(id)
+        val deactivated = userRepository.setUserActiveStatus(id, false)
         if (deactivated) {
             call.respond(HttpStatusCode.OK, "User deactivated")
+        } else {
+            call.respond(HttpStatusCode.NotFound, "User not found")
+        }
+    }
+}
+
+fun Route.activateUser(logger: Logger) {
+    val userRepository by inject<UserRepository>()
+
+    patch("/{id}/activate") {
+        val id = call.parameters["id"]?.toLongOrNull()
+        logger.debug("PATCH /users/$id/activate")
+
+        if (id == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+            return@patch
+        }
+
+        val activated = userRepository.setUserActiveStatus(id, true)
+        if (activated) {
+            call.respond(HttpStatusCode.OK, "User activated")
         } else {
             call.respond(HttpStatusCode.NotFound, "User not found")
         }

@@ -7,6 +7,7 @@ package com.gma.tsunjo.school
 import com.gma.school.database.DatabaseFactory
 import com.gma.school.database.config.DatabaseConfig
 import com.gma.tsunjo.school.di.appModule
+import com.gma.tsunjo.school.presentation.routes.studentRoutes
 import com.gma.tsunjo.school.presentation.routes.userRoutes
 import com.typesafe.config.ConfigFactory
 import io.ktor.serialization.kotlinx.json.json
@@ -60,6 +61,7 @@ fun Application.configureRouting() {
     }
 
     userRoutes()
+    studentRoutes()
 }
 
 fun Application.setupConfig(logger: Logger) {
