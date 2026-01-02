@@ -49,19 +49,18 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `POST users creates user successfully`() = withTestApp {
-        val request = CreateUserRequest("create@example.com", "password123", "Create User")
+        val request = CreateUserRequest("create@example.com", "password123")
         val response = client.post("/users") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), request))
         }
         assertEquals(HttpStatusCode.Created, response.status)
         assertTrue(response.bodyAsText().contains("create@example.com"))
-        assertTrue(response.bodyAsText().contains("Create User"))
     }
 
     @Test
     fun `POST users with duplicate email returns 409`() = withTestApp {
-        val request = CreateUserRequest("duplicate@example.com", "password123", "First User")
+        val request = CreateUserRequest("duplicate@example.com", "password123")
 
         // Create first user
         client.post("/users") {
@@ -70,7 +69,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
         }
 
         // Try to create duplicate
-        val duplicateRequest = CreateUserRequest("duplicate@example.com", "password456", "Second User")
+        val duplicateRequest = CreateUserRequest("duplicate@example.com", "password456")
         val response = client.post("/users") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), duplicateRequest))
@@ -91,26 +90,25 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `PUT users with valid data updates user successfully`() = withTestApp {
         // First create a user (will have ID 1)
-        val createRequest = CreateUserRequest("update@example.com", "password123", "Original Name")
+        val createRequest = CreateUserRequest("update@example.com", "password123")
         client.post("/users") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), createRequest))
         }
 
         // Update the user with ID 1
-        val updateRequest = UpdateUserRequest("updated@example.com", "Updated Name", true)
+        val updateRequest = UpdateUserRequest("updated@example.com", true)
         val response = client.put("/users/1") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(UpdateUserRequest.serializer(), updateRequest))
         }
         assertEquals(HttpStatusCode.OK, response.status)
         assertTrue(response.bodyAsText().contains("updated@example.com"))
-        assertTrue(response.bodyAsText().contains("Updated Name"))
     }
 
     @Test
     fun `PUT users with invalid id returns 400`() = withTestApp {
-        val request = UpdateUserRequest("updated@example.com", "Updated Name", true)
+        val request = UpdateUserRequest("updated@example.com", true)
         val response = client.put("/users/invalid") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(UpdateUserRequest.serializer(), request))
@@ -121,7 +119,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `PUT users with non-existent id returns 404`() = withTestApp {
-        val request = UpdateUserRequest("updated@example.com", "Updated Name", true)
+        val request = UpdateUserRequest("updated@example.com", true)
         val response = client.put("/users/999") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(UpdateUserRequest.serializer(), request))
@@ -133,7 +131,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `PATCH users deactivate with valid id deactivates user successfully`() = withTestApp {
         // First create a user (will have ID 1)
-        val createRequest = CreateUserRequest("deactivate@example.com", "password123", "Test User")
+        val createRequest = CreateUserRequest("deactivate@example.com", "password123")
         client.post("/users") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), createRequest))
@@ -162,7 +160,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `POST auth login with valid credentials returns 200`() = withTestApp {
         // First create a user
-        val createRequest = CreateUserRequest("login@example.com", "password123", "Login User")
+        val createRequest = CreateUserRequest("login@example.com", "password123")
         client.post("/users") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), createRequest))
@@ -192,7 +190,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `POST auth login with wrong password returns 401`() = withTestApp {
         // First create a user
-        val createRequest = CreateUserRequest("wrongpass@example.com", "correctpass", "Test User")
+        val createRequest = CreateUserRequest("wrongpass@example.com", "correctpass")
         client.post("/users") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), createRequest))

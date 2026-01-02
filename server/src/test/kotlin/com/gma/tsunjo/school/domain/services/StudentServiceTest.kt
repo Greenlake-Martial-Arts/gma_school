@@ -41,28 +41,21 @@ class StudentServiceTest {
     }
 
     @Test
-    fun `should update student and sync user fullName when name changes`() {
-        val updatedStudent = testStudent.copy(firstName = "Jane")
-        every { studentRepository.updateStudent(1L, firstName = "Jane", memberTypeId = 1L) } returns updatedStudent
-        every { userRepository.updateUser(100L, email = null, fullName = "Jane Doe") } returns mockk()
-
-        val result = studentService.updateStudent(
-            id = 1L,
-            firstName = "Jane",
-            memberTypeId = 1L
-        )
-
-        assertNotNull(result)
-        assertEquals("Jane", result.firstName)
-        verify { studentRepository.updateStudent(1L, firstName = "Jane", memberTypeId = 1L) }
-        verify { userRepository.updateUser(100L, email = null, fullName = "Jane Doe") }
-    }
-
-    @Test
-    fun `should update student and sync user email when email changes`() {
+    fun `should update student email and sync user username`() {
         val updatedStudent = testStudent.copy(email = "jane.doe@example.com")
-        every { studentRepository.updateStudent(1L, email = "jane.doe@example.com") } returns updatedStudent
-        every { userRepository.updateUser(100L, email = "jane.doe@example.com", fullName = null) } returns mockk()
+        every {
+            studentRepository.updateStudent(
+                1L,
+                null,
+                null,
+                null,
+                "jane.doe@example.com",
+                null,
+                null,
+                null
+            )
+        } returns updatedStudent
+        every { userRepository.updateUser(100L, username = "jane.doe@example.com") } returns mockk()
 
         val result = studentService.updateStudent(
             id = 1L,
@@ -71,15 +64,60 @@ class StudentServiceTest {
 
         assertNotNull(result)
         assertEquals("jane.doe@example.com", result.email)
-        verify { studentRepository.updateStudent(1L, email = "jane.doe@example.com") }
-        verify { userRepository.updateUser(100L, email = "jane.doe@example.com", fullName = null) }
+        verify { studentRepository.updateStudent(1L, null, null, null, "jane.doe@example.com", null, null, null) }
+        verify { userRepository.updateUser(100L, username = "jane.doe@example.com") }
     }
 
     @Test
-    fun `should update student and sync both user fullName and email when both change`() {
+    fun `should update student name and sync user with current email`() {
+        val updatedStudent = testStudent.copy(firstName = "Jane")
+        every {
+            studentRepository.updateStudent(
+                1L,
+                null,
+                "Jane",
+                null,
+                "john.doe@example.com",
+                null,
+                null,
+                null
+            )
+        } returns updatedStudent
+        every { userRepository.updateUser(100L, username = "john.doe@example.com") } returns mockk()
+
+        val result = studentService.updateStudent(
+            id = 1L,
+            firstName = "Jane",
+            email = "john.doe@example.com"
+        )
+
+        assertNotNull(result)
+        assertEquals("Jane", result.firstName)
+        verify { studentRepository.updateStudent(1L, null, "Jane", null, "john.doe@example.com", null, null, null) }
+        verify { userRepository.updateUser(100L, username = "john.doe@example.com") }
+    }
+
+    @Test
+    fun `should update student name and email with user sync`() {
         val updatedStudent = testStudent.copy(firstName = "Jane", email = "jane.smith@example.com")
-        every { studentRepository.updateStudent(1L, firstName = "Jane", email = "jane.smith@example.com") } returns updatedStudent
-        every { userRepository.updateUser(100L, email = "jane.smith@example.com", fullName = "Jane Doe") } returns mockk()
+        every {
+            studentRepository.updateStudent(
+                1L,
+                null,
+                "Jane",
+                null,
+                "jane.smith@example.com",
+                null,
+                null,
+                null
+            )
+        } returns updatedStudent
+        every {
+            userRepository.updateUser(
+                100L,
+                username = "jane.smith@example.com"
+            )
+        } returns mockk()
 
         val result = studentService.updateStudent(
             id = 1L,
@@ -90,24 +128,37 @@ class StudentServiceTest {
         assertNotNull(result)
         assertEquals("Jane", result.firstName)
         assertEquals("jane.smith@example.com", result.email)
-        verify { studentRepository.updateStudent(1L, firstName = "Jane", email = "jane.smith@example.com") }
-        verify { userRepository.updateUser(100L, email = "jane.smith@example.com", fullName = "Jane Doe") }
+        verify { studentRepository.updateStudent(1L, null, "Jane", null, "jane.smith@example.com", null, null, null) }
+        verify { userRepository.updateUser(100L, username = "jane.smith@example.com") }
     }
 
     @Test
-    fun `should update student without syncing user when name unchanged`() {
+    fun `should update student phone and sync user with current email`() {
         val updatedStudent = testStudent.copy(phone = "555-9999")
-        every { studentRepository.updateStudent(1L, phone = "555-9999", memberTypeId = 1L) } returns updatedStudent
+        every {
+            studentRepository.updateStudent(
+                1L,
+                null,
+                null,
+                null,
+                "john.doe@example.com",
+                "555-9999",
+                1L,
+                null
+            )
+        } returns updatedStudent
+        every { userRepository.updateUser(100L, username = "john.doe@example.com") } returns mockk()
 
         val result = studentService.updateStudent(
             id = 1L,
+            email = "john.doe@example.com",
             phone = "555-9999",
             memberTypeId = 1L
         )
 
         assertNotNull(result)
         assertEquals("555-9999", result.phone)
-        verify { studentRepository.updateStudent(1L, phone = "555-9999", memberTypeId = 1L) }
-        verify(exactly = 0) { userRepository.updateUser(any(), any()) }
+        verify { studentRepository.updateStudent(1L, null, null, null, "john.doe@example.com", "555-9999", 1L, null) }
+        verify { userRepository.updateUser(100L, username = "john.doe@example.com") }
     }
 }

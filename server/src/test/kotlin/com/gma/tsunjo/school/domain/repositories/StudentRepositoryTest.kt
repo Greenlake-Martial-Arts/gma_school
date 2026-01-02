@@ -117,7 +117,7 @@ class StudentRepositoryTest {
             externalCode = null,
             firstName = "John",
             lastName = "Doe",
-            email = null,
+            email = "john.doe@example.com",
             phone = null,
             memberTypeId = 999L
         )

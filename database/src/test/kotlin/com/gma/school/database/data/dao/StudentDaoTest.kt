@@ -37,7 +37,7 @@ class StudentDaoTest {
             // Insert test users for foreign key references
             for (i in 1..10) {
                 UsersTable.insert {
-                    it[email] = "user$i@test.com"
+                    it[username] = "user$i@test.com"
                     it[passwordHash] = "hash$i"
                 }
             }
@@ -114,7 +114,7 @@ class StudentDaoTest {
             externalCode = externalCode,
             firstName = "Bob",
             lastName = "Wilson",
-            email = null,
+            email = "bob.wilson@email.com",
             phone = null,
             memberTypeId = memberTypeId
         )
@@ -133,7 +133,7 @@ class StudentDaoTest {
             externalCode = null,
             firstName = "Original",
             lastName = "Name",
-            email = null,
+            email = "original.name@email.com",
             phone = null,
             memberTypeId = memberTypeId
         )!!
@@ -161,7 +161,7 @@ class StudentDaoTest {
             externalCode = null,
             firstName = "Active",
             lastName = "Student",
-            email = null,
+            email = "active.student@email.com",
             phone = null,
             memberTypeId = memberTypeId
         )
@@ -172,7 +172,7 @@ class StudentDaoTest {
             externalCode = null,
             firstName = "Inactive",
             lastName = "Student",
-            email = null,
+            email = "inactive.student@email.com",
             phone = null,
             memberTypeId = memberTypeId
         )!!
@@ -197,7 +197,7 @@ class StudentDaoTest {
             externalCode = null,
             firstName = "Test",
             lastName = "User",
-            email = null,
+            email = "test.user@email.com",
             phone = null,
             memberTypeId = memberTypeId
         )!!
