@@ -79,8 +79,8 @@ class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao)
         return userDao.removeUserRole(userId, roleId)
     }
 
-    fun deactivateUser(id: Long): Boolean {
-        val updated = userDao.update(id, isActive = false)
+    fun setUserActiveStatus(id: Long, isActive: Boolean): Boolean {
+        val updated = userDao.update(id, isActive = isActive)
         return updated != null
     }
 
