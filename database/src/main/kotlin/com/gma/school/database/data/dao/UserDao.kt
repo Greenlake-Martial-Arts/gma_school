@@ -90,7 +90,6 @@ class UserDao {
         id = row[UsersTable.id].value,
         email = row[UsersTable.email],
         fullName = row[UsersTable.fullName],
-        studentId = row[UsersTable.studentId]?.value,
         isActive = row[UsersTable.isActive],
         createdAt = row[UsersTable.createdAt].toString(),
         updatedAt = row[UsersTable.updatedAt].toString()

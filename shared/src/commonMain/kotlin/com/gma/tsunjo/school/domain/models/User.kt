@@ -9,7 +9,6 @@ data class User(
     val id: Long,
     val email: String,
     val fullName: String?,
-    val studentId: Long?,
     val isActive: Boolean,
     val createdAt: String,
     val updatedAt: String

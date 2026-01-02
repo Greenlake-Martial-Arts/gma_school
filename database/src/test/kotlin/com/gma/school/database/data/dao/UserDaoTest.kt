@@ -258,7 +258,6 @@ class UserDaoTest {
         assertEquals(user.id, retrievedUser.id)
         assertEquals("mapping@example.com", retrievedUser.email)
         assertEquals("Mapping Test", retrievedUser.fullName)
-        assertNull(retrievedUser.studentId)
         assertTrue(retrievedUser.isActive)
         assertNotNull(retrievedUser.createdAt)
         assertNotNull(retrievedUser.updatedAt)

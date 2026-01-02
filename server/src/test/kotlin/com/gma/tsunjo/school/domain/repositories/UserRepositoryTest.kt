@@ -27,7 +27,6 @@ class UserRepositoryTest {
         id = 1L,
         email = "test@example.com",
         fullName = "Test User",
-        studentId = null,
         isActive = true,
         createdAt = "2025-01-01T00:00:00",
         updatedAt = "2025-01-01T00:00:00"
@@ -213,13 +212,13 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun `deactivateUser returns true when successful`() {
+    fun `setUserActiveStatus returns true when successful`() {
         // Given
         val deactivatedUser = testUser.copy(isActive = false)
         every { userDao.update(1L, isActive = false) } returns deactivatedUser
 
         // When
-        val result = userRepository.deactivateUser(1L)
+        val result = userRepository.setUserActiveStatus(1L, false)
 
         // Then
         assertTrue(result)
@@ -227,12 +226,12 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun `deactivateUser returns false when user not found`() {
+    fun `setUserActiveStatus returns false when user not found`() {
         // Given
         every { userDao.update(999L, isActive = false) } returns null
 
         // When
-        val result = userRepository.deactivateUser(999L)
+        val result = userRepository.setUserActiveStatus(999L, false)
 
         // Then
         assertFalse(result)
