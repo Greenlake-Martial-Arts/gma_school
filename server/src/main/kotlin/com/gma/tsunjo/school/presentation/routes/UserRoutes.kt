@@ -34,6 +34,7 @@ fun Application.userRoutes() {
             createUser(logger)
             updateUser(logger)
             deactivateUser(logger)
+            activateUser(logger)
         }
 
         route("/auth") {
@@ -91,9 +92,8 @@ fun Route.createUser(logger: Logger) {
         val request = call.receive<CreateUserRequest>()
 
         userRepository.createUser(
-            email = request.email,
+            username = request.username,
             password = request.password,
-            fullName = request.fullName,
             roleId = request.roleId
         ).fold(
             onSuccess = { user ->
@@ -121,8 +121,7 @@ fun Route.updateUser(logger: Logger) {
         val request = call.receive<UpdateUserRequest>()
         val user = userRepository.updateUser(
             id = id,
-            email = request.email,
-            fullName = request.fullName,
+            username = request.username,
             isActive = request.isActive
         )
 
@@ -146,9 +145,30 @@ fun Route.deactivateUser(logger: Logger) {
             return@patch
         }
 
-        val deactivated = userRepository.deactivateUser(id)
+        val deactivated = userRepository.setUserActiveStatus(id, false)
         if (deactivated) {
             call.respond(HttpStatusCode.OK, "User deactivated")
+        } else {
+            call.respond(HttpStatusCode.NotFound, "User not found")
+        }
+    }
+}
+
+fun Route.activateUser(logger: Logger) {
+    val userRepository by inject<UserRepository>()
+
+    patch("/{id}/activate") {
+        val id = call.parameters["id"]?.toLongOrNull()
+        logger.debug("PATCH /users/$id/activate")
+
+        if (id == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+            return@patch
+        }
+
+        val activated = userRepository.setUserActiveStatus(id, true)
+        if (activated) {
+            call.respond(HttpStatusCode.OK, "User activated")
         } else {
             call.respond(HttpStatusCode.NotFound, "User not found")
         }
@@ -162,7 +182,7 @@ fun Route.loginUser(logger: Logger) {
         logger.debug("POST /auth/login")
         val request = call.receive<LoginRequest>()
 
-        val user = userRepository.authenticateUser(request.email, request.password)
+        val user = userRepository.authenticateUser(request.username, request.password)
         if (user != null) {
             call.respond(HttpStatusCode.OK, user)
         } else {

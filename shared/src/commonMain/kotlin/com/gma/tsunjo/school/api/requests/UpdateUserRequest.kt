@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UpdateUserRequest(
-    val email: String? = null,
-    val fullName: String? = null,
+    val username: String? = null,
     val isActive: Boolean? = null
 )

@@ -51,12 +51,11 @@ class UserDaoTest {
     @Test
     fun `insert creates user successfully`() {
         // When
-        val user = userDao.insert("test@example.com", "hashedpassword", "Test User")
+        val user = userDao.insert("test@example.com", "hashedpassword")
 
         // Then
         assertNotNull(user)
-        assertEquals("test@example.com", user.email)
-        assertEquals("Test User", user.fullName)
+        assertEquals("test@example.com", user.username)
         assertTrue(user.isActive)
         assertTrue(user.id > 0)
     }
@@ -68,15 +67,14 @@ class UserDaoTest {
 
         // Then
         assertNotNull(user)
-        assertEquals("minimal@example.com", user.email)
-        assertNull(user.fullName)
+        assertEquals("minimal@example.com", user.username)
         assertTrue(user.isActive)
     }
 
     @Test
     fun `findById returns user when exists`() {
         // Given
-        val createdUser = userDao.insert("test@example.com", "hashedpassword", "Test User")!!
+        val createdUser = userDao.insert("test@example.com", "hashedpassword")!!
 
         // When
         val foundUser = userDao.findById(createdUser.id)
@@ -84,8 +82,7 @@ class UserDaoTest {
         // Then
         assertNotNull(foundUser)
         assertEquals(createdUser.id, foundUser.id)
-        assertEquals(createdUser.email, foundUser.email)
-        assertEquals(createdUser.fullName, foundUser.fullName)
+        assertEquals(createdUser.username, foundUser.username)
     }
 
     @Test
@@ -98,23 +95,23 @@ class UserDaoTest {
     }
 
     @Test
-    fun `findByEmail returns user when exists`() {
+    fun `findByusername returns user when exists`() {
         // Given
-        val createdUser = userDao.insert("test@example.com", "hashedpassword", "Test User")!!
+        val createdUser = userDao.insert("test@example.com", "hashedpassword")!!
 
         // When
-        val foundUser = userDao.findByEmail("test@example.com")
+        val foundUser = userDao.findByUsername("test@example.com")
 
         // Then
         assertNotNull(foundUser)
         assertEquals(createdUser.id, foundUser.id)
-        assertEquals("test@example.com", foundUser.email)
+        assertEquals("test@example.com", foundUser.username)
     }
 
     @Test
-    fun `findByEmail returns null when user does not exist`() {
+    fun `findByusername returns null when user does not exist`() {
         // When
-        val user = userDao.findByEmail("nonexistent@example.com")
+        val user = userDao.findByUsername("nonexistent@example.com")
 
         // Then
         assertNull(user)
@@ -123,23 +120,23 @@ class UserDaoTest {
     @Test
     fun `findAll returns all users`() {
         // Given
-        userDao.insert("user1@example.com", "hash1", "User 1")
-        userDao.insert("user2@example.com", "hash2", "User 2")
+        userDao.insert("user1@example.com", "hash1")
+        userDao.insert("user2@example.com", "hash2")
 
         // When
         val users = userDao.findAll()
 
         // Then
         assertEquals(2, users.size)
-        assertTrue(users.any { it.email == "user1@example.com" })
-        assertTrue(users.any { it.email == "user2@example.com" })
+        assertTrue(users.any { it.username == "user1@example.com" })
+        assertTrue(users.any { it.username == "user2@example.com" })
     }
 
     @Test
     fun `findAllActive returns only active users`() {
         // Given
-        val user1 = userDao.insert("active@example.com", "hash1", "Active User")!!
-        val user2 = userDao.insert("inactive@example.com", "hash2", "Inactive User")!!
+        val user1 = userDao.insert("active@example.com", "hash1")!!
+        val user2 = userDao.insert("inactive@example.com", "hash2")!!
 
         // Deactivate user2
         userDao.update(user2.id, isActive = false)
@@ -149,49 +146,46 @@ class UserDaoTest {
 
         // Then
         assertEquals(1, activeUsers.size)
-        assertEquals("active@example.com", activeUsers[0].email)
+        assertEquals("active@example.com", activeUsers[0].username)
         assertTrue(activeUsers[0].isActive)
     }
 
     @Test
     fun `update modifies user fields successfully`() {
         // Given
-        val user = userDao.insert("original@example.com", "hash", "Original Name")!!
+        val user = userDao.insert("original@example.com", "hash")!!
 
         // When
         val updatedUser = userDao.update(
             id = user.id,
-            email = "updated@example.com",
-            fullName = "Updated Name",
+            username = "updated@example.com",
             isActive = false
         )
 
         // Then
         assertNotNull(updatedUser)
-        assertEquals("updated@example.com", updatedUser.email)
-        assertEquals("Updated Name", updatedUser.fullName)
+        assertEquals("updated@example.com", updatedUser.username)
         assertEquals(false, updatedUser.isActive)
     }
 
     @Test
     fun `update with partial fields only updates specified fields`() {
         // Given
-        val user = userDao.insert("test@example.com", "hash", "Test User")!!
+        val user = userDao.insert("test@example.com", "hash")!!
 
         // When
-        val updatedUser = userDao.update(id = user.id, fullName = "New Name")
+        val updatedUser = userDao.update(id = user.id, username = "new@example.com")
 
         // Then
         assertNotNull(updatedUser)
-        assertEquals("test@example.com", updatedUser.email) // unchanged
-        assertEquals("New Name", updatedUser.fullName) // changed
+        assertEquals("new@example.com", updatedUser.username) // changed
         assertTrue(updatedUser.isActive) // unchanged
     }
 
     @Test
     fun `update returns null when user does not exist`() {
         // When
-        val result = userDao.update(999L, email = "new@example.com")
+        val result = userDao.update(999L, username = "new@example.com")
 
         // Then
         assertNull(result)
@@ -201,21 +195,21 @@ class UserDaoTest {
     fun `authenticate returns user with valid credentials for active user`() {
         val passwordHash = Base64.getEncoder().encodeToString("password".toByteArray())
         // Given
-        userDao.insert("test@example.com", passwordHash, "Test User")
+        userDao.insert("test@example.com", passwordHash)
 
         // When
         val authenticatedUser = userDao.authenticate("test@example.com", "password")
 
         // Then
         assertNotNull(authenticatedUser)
-        assertEquals("test@example.com", authenticatedUser.email)
+        assertEquals("test@example.com", authenticatedUser.username)
         assertTrue(authenticatedUser.isActive)
     }
 
     @Test
     fun `authenticate returns null for inactive user`() {
         // Given
-        val user = userDao.insert("test@example.com", "password", "Test User")!!
+        val user = userDao.insert("test@example.com", "password")!!
         userDao.update(user.id, isActive = false)
 
         // When
@@ -228,7 +222,7 @@ class UserDaoTest {
     @Test
     fun `authenticate returns null with invalid password`() {
         // Given
-        userDao.insert("test@example.com", "correctpassword", "Test User")
+        userDao.insert("test@example.com", "correctpassword")
 
         // When
         val authenticatedUser = userDao.authenticate("test@example.com", "wrongpassword")
@@ -249,16 +243,14 @@ class UserDaoTest {
     @Test
     fun `rowToUser maps database row correctly`() {
         // Given - create a user to test the mapping
-        val user = userDao.insert("mapping@example.com", "hash", "Mapping Test")!!
+        val user = userDao.insert("mapping@example.com", "hash")!!
 
         // When - retrieve and verify mapping
         val retrievedUser = userDao.findById(user.id)!!
 
         // Then
         assertEquals(user.id, retrievedUser.id)
-        assertEquals("mapping@example.com", retrievedUser.email)
-        assertEquals("Mapping Test", retrievedUser.fullName)
-        assertNull(retrievedUser.studentId)
+        assertEquals("mapping@example.com", retrievedUser.username)
         assertTrue(retrievedUser.isActive)
         assertNotNull(retrievedUser.createdAt)
         assertNotNull(retrievedUser.updatedAt)
@@ -267,7 +259,7 @@ class UserDaoTest {
     @Test
     fun `addUserRole assigns role to user`() = transaction {
         // Given
-        val user = userDao.insert("role@example.com", "hashedPassword", "Role Test")!!
+        val user = userDao.insert("role@example.com", "hashedPassword")!!
         val role = roleDao.insert("TEST_ROLE")!!
 
         // When
@@ -280,7 +272,7 @@ class UserDaoTest {
     @Test
     fun `addUserRole returns false for duplicate role assignment`() = transaction {
         // Given
-        val user = userDao.insert("duplicate@example.com", "hashedPassword", "Duplicate Test")!!
+        val user = userDao.insert("duplicate@example.com", "hashedPassword")!!
         val role = roleDao.insert("DUPLICATE_ROLE")!!
         userDao.addUserRole(user.id, role.id)
 
@@ -294,7 +286,7 @@ class UserDaoTest {
     @Test
     fun `removeUserRole removes specific role from user`() = transaction {
         // Given
-        val user = userDao.insert("remove@example.com", "hashedPassword", "Remove Test")!!
+        val user = userDao.insert("remove@example.com", "hashedPassword")!!
         val role1 = roleDao.insert("ROLE_1")!!
         val role2 = roleDao.insert("ROLE_2")!!
         userDao.addUserRole(user.id, role1.id)
@@ -310,7 +302,7 @@ class UserDaoTest {
     @Test
     fun `replaceUserRoles replaces all user roles`() = transaction {
         // Given
-        val user = userDao.insert("replace@example.com", "hashedPassword", "Replace Test")!!
+        val user = userDao.insert("replace@example.com", "hashedPassword")!!
         val role1 = roleDao.insert("OLD_ROLE_1")!!
         val role2 = roleDao.insert("OLD_ROLE_2")!!
         val role3 = roleDao.insert("NEW_ROLE_1")!!
@@ -329,7 +321,7 @@ class UserDaoTest {
     @Test
     fun `replaceUserRoles with empty list removes all roles`() = transaction {
         // Given
-        val user = userDao.insert("empty@example.com", "hashedPassword", "Empty Test")!!
+        val user = userDao.insert("empty@example.com", "hashedPassword")!!
         val role = roleDao.insert("TEMP_ROLE")!!
         userDao.addUserRole(user.id, role.id)
 

@@ -25,9 +25,7 @@ class UserRepositoryTest {
 
     private val testUser = User(
         id = 1L,
-        email = "test@example.com",
-        fullName = "Test User",
-        studentId = null,
+        username = "test@example.com",
         isActive = true,
         createdAt = "2025-01-01T00:00:00",
         updatedAt = "2025-01-01T00:00:00"
@@ -88,80 +86,76 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun `getUserByEmail returns user when found`() {
+    fun `getUserByusername returns user when found`() {
         // Given
-        every { userDao.findByEmail("test@example.com") } returns testUser
+        every { userDao.findByUsername("test@example.com") } returns testUser
 
         // When
-        val result = userRepository.getUserByEmail("test@example.com")
+        val result = userRepository.getUserByUsername("test@example.com")
 
         // Then
         assertEquals(testUser, result)
-        verify { userDao.findByEmail("test@example.com") }
+        verify { userDao.findByUsername("test@example.com") }
     }
 
     @Test
-    fun `createUser succeeds when email is unique`() {
+    fun `createUser succeeds when username is unique`() {
         // Given
-        every { userDao.findByEmail("new@example.com") } returns null
+        every { userDao.findByUsername("new@example.com") } returns null
         every {
             userDao.insert(
                 "new@example.com",
-                Base64.getEncoder().encodeToString("password".toByteArray()),
-                "New User"
+                Base64.getEncoder().encodeToString("password".toByteArray())
             )
         } returns testUser
         every { roleDao.findByName("STUDENT") } returns Role(4L, "STUDENT")
         every { userDao.assignRole(testUser.id, 4L) } returns true
 
         // When
-        val result = userRepository.createUser("new@example.com", "password", "New User")
+        val result = userRepository.createUser("new@example.com", "password")
 
         // Then
         assertTrue(result.isSuccess)
         assertEquals(testUser, result.getOrNull())
-        verify { userDao.findByEmail("new@example.com") }
+        verify { userDao.findByUsername("new@example.com") }
         verify {
             userDao.insert(
                 "new@example.com",
-                Base64.getEncoder().encodeToString("password".toByteArray()),
-                "New User"
+                Base64.getEncoder().encodeToString("password".toByteArray())
             )
         }
         verify { userDao.assignRole(testUser.id, 4L) }
     }
 
     @Test
-    fun `createUser fails when email already exists`() {
+    fun `createUser fails when username already exists`() {
         // Given
-        every { userDao.findByEmail("existing@example.com") } returns testUser
+        every { userDao.findByUsername("existing@example.com") } returns testUser
 
         // When
-        val result = userRepository.createUser("existing@example.com", "password", "User")
+        val result = userRepository.createUser("existing@example.com", "password")
 
         // Then
         assertTrue(result.isFailure)
         val exception = result.exceptionOrNull()
         assertTrue(exception is AppException.UserAlreadyExists)
-        assertEquals("User with email existing@example.com already exists", exception.message)
-        verify { userDao.findByEmail("existing@example.com") }
-        verify(exactly = 0) { userDao.insert(any(), any(), any()) }
+        verify { userDao.findByUsername("existing@example.com") }
+        verify(exactly = 0) { userDao.insert(any(), any()) }
     }
 
     @Test
     fun `createUser fails when dao insert returns null`() {
         // Given
-        every { userDao.findByEmail("test@example.com") } returns null
+        every { userDao.findByUsername("test@example.com") } returns null
         every {
             userDao.insert(
                 "test@example.com",
-                Base64.getEncoder().encodeToString("password".toByteArray()),
-                "Test User"
+                Base64.getEncoder().encodeToString("password".toByteArray())
             )
         } returns null
 
         // When
-        val result = userRepository.createUser("test@example.com", "password", "Test User")
+        val result = userRepository.createUser("test@example.com", "password")
 
         // Then
         assertTrue(result.isFailure)
@@ -173,10 +167,10 @@ class UserRepositoryTest {
     @Test
     fun `createUser handles dao exceptions`() {
         // Given
-        every { userDao.findByEmail("test@example.com") } throws RuntimeException("Database error")
+        every { userDao.findByUsername("test@example.com") } throws RuntimeException("Database error")
 
         // When
-        val result = userRepository.createUser("test@example.com", "password", "Test User")
+        val result = userRepository.createUser("test@example.com", "password")
 
         // Then
         assertTrue(result.isFailure)
@@ -188,38 +182,38 @@ class UserRepositoryTest {
     @Test
     fun `updateUser returns updated user when successful`() {
         // Given
-        val updatedUser = testUser.copy(fullName = "Updated Name")
-        every { userDao.update(1L, null, "Updated Name", null) } returns updatedUser
+        val updatedUser = testUser.copy(username = "updated@example.com")
+        every { userDao.update(1L, "updated@example.com", null) } returns updatedUser
 
         // When
-        val result = userRepository.updateUser(1L, fullName = "Updated Name")
+        val result = userRepository.updateUser(1L, username = "updated@example.com")
 
         // Then
         assertEquals(updatedUser, result)
-        verify { userDao.update(1L, null, "Updated Name", null) }
+        verify { userDao.update(1L, "updated@example.com", null) }
     }
 
     @Test
     fun `updateUser returns null when user not found`() {
         // Given
-        every { userDao.update(999L, null, "Updated Name", null) } returns null
+        every { userDao.update(999L, "updated@example.com", null) } returns null
 
         // When
-        val result = userRepository.updateUser(999L, fullName = "Updated Name")
+        val result = userRepository.updateUser(999L, username = "updated@example.com")
 
         // Then
         assertNull(result)
-        verify { userDao.update(999L, null, "Updated Name", null) }
+        verify { userDao.update(999L, "updated@example.com", null) }
     }
 
     @Test
-    fun `deactivateUser returns true when successful`() {
+    fun `setUserActiveStatus returns true when successful`() {
         // Given
         val deactivatedUser = testUser.copy(isActive = false)
         every { userDao.update(1L, isActive = false) } returns deactivatedUser
 
         // When
-        val result = userRepository.deactivateUser(1L)
+        val result = userRepository.setUserActiveStatus(1L, false)
 
         // Then
         assertTrue(result)
@@ -227,12 +221,12 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun `deactivateUser returns false when user not found`() {
+    fun `setUserActiveStatus returns false when user not found`() {
         // Given
         every { userDao.update(999L, isActive = false) } returns null
 
         // When
-        val result = userRepository.deactivateUser(999L)
+        val result = userRepository.setUserActiveStatus(999L, false)
 
         // Then
         assertFalse(result)
@@ -294,52 +288,51 @@ class UserRepositoryTest {
     @Test
     fun `updateUserWithRoles updates user and replaces roles`() {
         // Given
-        val updatedUser = testUser.copy(fullName = "Updated Name")
-        every { userDao.update(1L, "new@example.com", "Updated Name", true) } returns updatedUser
+        val updatedUser = testUser.copy(username = "new@example.com")
+        every { userDao.update(1L, "new@example.com", true) } returns updatedUser
         every { userDao.replaceUserRoles(1L, listOf(2L, 3L)) } returns true
 
         // When
         val result = userRepository.updateUserWithRoles(
             id = 1L,
-            email = "new@example.com",
-            fullName = "Updated Name",
+            username = "new@example.com",
             isActive = true,
             roleIds = listOf(2L, 3L)
         )
 
         // Then
         assertEquals(updatedUser, result)
-        verify { userDao.update(1L, "new@example.com", "Updated Name", true) }
+        verify { userDao.update(1L, "new@example.com", true) }
         verify { userDao.replaceUserRoles(1L, listOf(2L, 3L)) }
     }
 
     @Test
     fun `updateUserWithRoles without roleIds only updates user`() {
         // Given
-        val updatedUser = testUser.copy(fullName = "Updated Name")
-        every { userDao.update(1L, null, "Updated Name", null) } returns updatedUser
+        val updatedUser = testUser.copy(username = "updated@example.com")
+        every { userDao.update(1L, "updated@example.com", null) } returns updatedUser
 
         // When
         val result = userRepository.updateUserWithRoles(
             id = 1L,
-            fullName = "Updated Name"
+            username = "updated@example.com"
         )
 
         // Then
         assertEquals(updatedUser, result)
-        verify { userDao.update(1L, null, "Updated Name", null) }
+        verify { userDao.update(1L, "updated@example.com", null) }
         verify(exactly = 0) { userDao.replaceUserRoles(any(), any()) }
     }
 
     @Test
     fun `updateUserWithRoles returns null on exception`() {
         // Given
-        every { userDao.update(1L, null, "Updated Name", null) } throws RuntimeException("Database error")
+        every { userDao.update(1L, "updated@example.com", null) } throws RuntimeException("Database error")
 
         // When
         val result = userRepository.updateUserWithRoles(
             id = 1L,
-            fullName = "Updated Name"
+            username = "updated@example.com"
         )
 
         // Then
@@ -349,41 +342,38 @@ class UserRepositoryTest {
     @Test
     fun `createUser uses default STUDENT role when roleId not provided`() {
         // Given
-        every { userDao.findByEmail("student@example.com") } returns null
+        every { userDao.findByUsername("student@example.com") } returns null
         every {
             userDao.insert(
                 "student@example.com",
-                Base64.getEncoder().encodeToString("password".toByteArray()),
-                "Student User"
+                Base64.getEncoder().encodeToString("password".toByteArray())
             )
         } returns testUser
         every { roleDao.findByName("STUDENT") } returns Role(4L, "STUDENT")
         every { userDao.assignRole(testUser.id, 4L) } returns true
 
         // When
-        val result = userRepository.createUser("student@example.com", "password", "Student User")
+        val result = userRepository.createUser("student@example.com", "password", 4L)
 
         // Then
         assertTrue(result.isSuccess)
-        verify { roleDao.findByName("STUDENT") }
         verify { userDao.assignRole(testUser.id, 4L) }
     }
 
     @Test
     fun `createUser throws exception when STUDENT role not found`() {
         // Given
-        every { userDao.findByEmail("student@example.com") } returns null
+        every { userDao.findByUsername("student@example.com") } returns null
         every {
             userDao.insert(
                 "student@example.com",
-                Base64.getEncoder().encodeToString("password".toByteArray()),
-                "Student User"
+                Base64.getEncoder().encodeToString("password".toByteArray())
             )
         } returns testUser
         every { roleDao.findByName("STUDENT") } returns null
 
         // When
-        val result = userRepository.createUser("student@example.com", "password", "Student User")
+        val result = userRepository.createUser("student@example.com", "password")
 
         // Then
         assertTrue(result.isFailure)
