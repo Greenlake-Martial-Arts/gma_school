@@ -1,0 +1,22 @@
+// © 2025-2026 Hector Torres - Greenlake Martial Arts
+package com.gma.school.database.data.tables
+
+import java.time.LocalDateTime
+import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.javatime.datetime
+
+object StudentProgressTable : LongIdTable("student_progress") {
+    val studentId: Column<Long> = long("student_id").references(StudentsTable.id)
+    val levelRequirementId: Column<Long> = long("level_requirement_id").references(LevelRequirementsTable.id)
+    val completedAt: Column<LocalDateTime?> = datetime("completed_at").nullable()
+    val instructorId: Column<Long?> = long("instructor_id").references(StudentsTable.id).nullable()
+    val attempts: Column<Int> = integer("attempts").default(0)
+    val notes: Column<String?> = text("notes").nullable()
+    val createdAt: Column<LocalDateTime> = datetime("created_at").default(LocalDateTime.now())
+    val updatedAt: Column<LocalDateTime> = datetime("updated_at").default(LocalDateTime.now())
+
+    init {
+        uniqueIndex(studentId, levelRequirementId)
+    }
+}
