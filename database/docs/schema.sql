@@ -62,7 +62,9 @@ CREATE TABLE students (
     last_name      VARCHAR(100) NOT NULL,
     email          VARCHAR(255) UNIQUE,
     phone          VARCHAR(30),
+    address        TEXT,
     member_type_id BIGINT NOT NULL,
+    signup_date    DATE COMMENT 'Original sign-up date when student first joined',
     is_active      TINYINT(1) NOT NULL DEFAULT '1',
     created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -176,23 +178,3 @@ CREATE TABLE audit_log (
     KEY fk_audit_user (user_id),
     CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- INITIAL DATA INSERTS
--- ============================================================================
-
--- Default roles
-INSERT INTO roles (name) VALUES
-('ADMIN'),
-('INSTRUCTOR'),
-('DIRECTOR'),
-('STUDENT');
-
--- Default member types
-INSERT INTO member_types (name) VALUES
-('Regular'),
-('Prospect'),
-('Women\'s self defense'),
-('Instructor'),
-('Workshop'),
-('Parent');
