@@ -3,7 +3,9 @@ package com.gma.school.database.data.dao
 
 import com.gma.school.database.data.tables.StudentProgressTable
 import com.gma.tsunjo.school.domain.models.StudentProgress
-import java.time.LocalDateTime
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
@@ -20,15 +22,18 @@ class StudentProgressDao {
         attempts: Int,
         notes: String?
     ): StudentProgress = transaction {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         val id = StudentProgressTable.insertAndGetId {
             it[StudentProgressTable.studentId] = studentId
             it[StudentProgressTable.levelRequirementId] = levelRequirementId
             it[StudentProgressTable.instructorId] = instructorId
             it[StudentProgressTable.attempts] = attempts
             it[StudentProgressTable.notes] = notes
+            it[StudentProgressTable.createdAt] = now
+            it[StudentProgressTable.updatedAt] = now
         }.value
 
-        StudentProgress(id, studentId, levelRequirementId, null, instructorId, attempts, notes)
+        StudentProgress(id, studentId, levelRequirementId, null, instructorId, attempts, notes, now, now)
     }
 
     fun findById(id: Long): StudentProgress? = transaction {
@@ -44,7 +49,7 @@ class StudentProgressDao {
 
     fun markCompleted(id: Long, instructorId: Long): Boolean = transaction {
         StudentProgressTable.update({ StudentProgressTable.id eq id }) {
-            it[StudentProgressTable.completedAt] = LocalDateTime.now()
+            it[StudentProgressTable.completedAt] = Clock.System.now().toLocalDateTime(TimeZone.UTC)
             it[StudentProgressTable.instructorId] = instructorId
         } > 0
     }
@@ -64,9 +69,11 @@ class StudentProgressDao {
         id = row[StudentProgressTable.id].value,
         studentId = row[StudentProgressTable.studentId],
         levelRequirementId = row[StudentProgressTable.levelRequirementId],
-        completedAt = row[StudentProgressTable.completedAt]?.toString(),
+        completedAt = row[StudentProgressTable.completedAt],
         instructorId = row[StudentProgressTable.instructorId],
         attempts = row[StudentProgressTable.attempts],
-        notes = row[StudentProgressTable.notes]
+        notes = row[StudentProgressTable.notes],
+        createdAt = row[StudentProgressTable.createdAt],
+        updatedAt = row[StudentProgressTable.updatedAt]
     )
 }

@@ -5,6 +5,9 @@ package com.gma.school.database.data.dao
 import com.gma.school.database.data.tables.MoveCategoriesTable
 import com.gma.school.database.data.tables.MovesTable
 import com.gma.tsunjo.school.domain.models.Move
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
@@ -21,14 +24,17 @@ class MoveDao {
 
     fun create(name: String, description: String?): Move = transaction {
         val categoryId = getDefaultCategoryId()
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
 
         val id = MovesTable.insertAndGetId {
             it[MovesTable.name] = name
             it[MovesTable.description] = description
             it[MovesTable.moveCategoriesId] = categoryId
+            it[MovesTable.createdAt] = now
+            it[MovesTable.updatedAt] = now
         }.value
 
-        Move(id, name, description, categoryId)
+        Move(id, name, description, categoryId, now, now)
     }
 
     fun findById(id: Long): Move? = transaction {
@@ -72,6 +78,8 @@ class MoveDao {
         id = row[MovesTable.id].value,
         name = row[MovesTable.name],
         description = row[MovesTable.description],
-        moveCategoryId = row[MovesTable.moveCategoriesId]
+        moveCategoryId = row[MovesTable.moveCategoriesId],
+        createdAt = row[MovesTable.createdAt],
+        updatedAt = row[MovesTable.updatedAt]
     )
 }

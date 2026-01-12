@@ -5,8 +5,10 @@ package com.gma.school.database.data.dao
 import com.gma.school.database.data.tables.UserRolesTable
 import com.gma.school.database.data.tables.UsersTable
 import com.gma.tsunjo.school.domain.models.User
-import java.time.LocalDateTime
 import java.util.Base64
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
@@ -40,11 +42,12 @@ class UserDao {
     }
 
     fun insert(username: String, passwordHash: String): User? = transaction {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         val insertStatement = UsersTable.insert {
             it[UsersTable.username] = username
             it[UsersTable.passwordHash] = passwordHash
-            it[createdAt] = LocalDateTime.now()
-            it[updatedAt] = LocalDateTime.now()
+            it[createdAt] = now
+            it[updatedAt] = now
         }
 
         val id = insertStatement[UsersTable.id].value
@@ -56,7 +59,7 @@ class UserDao {
             val updateCount = UsersTable.update({ UsersTable.id eq id }) {
                 username?.let { u -> it[UsersTable.username] = u }
                 isActive?.let { active -> it[UsersTable.isActive] = active }
-                it[updatedAt] = LocalDateTime.now()
+                it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.UTC)
             }
 
             if (updateCount > 0) findById(id) else null

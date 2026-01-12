@@ -4,8 +4,10 @@ package com.gma.school.database.data.dao
 
 import com.gma.school.database.data.tables.StudentsTable
 import com.gma.tsunjo.school.domain.models.Student
-import java.time.LocalDate
-import java.time.LocalDateTime
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -52,6 +54,7 @@ class StudentDao {
         memberTypeId: Long,
         signupDate: LocalDate?
     ): Student? = transaction {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         val insertStatement = StudentsTable.insert {
             it[StudentsTable.userId] = userId
             it[StudentsTable.externalCode] = externalCode
@@ -62,8 +65,8 @@ class StudentDao {
             it[StudentsTable.address] = address
             it[StudentsTable.memberTypeId] = memberTypeId
             it[StudentsTable.signupDate] = signupDate
-            it[createdAt] = LocalDateTime.now()
-            it[updatedAt] = LocalDateTime.now()
+            it[createdAt] = now
+            it[updatedAt] = now
         }
 
         val id = insertStatement[StudentsTable.id].value
@@ -92,7 +95,7 @@ class StudentDao {
             memberTypeId?.let { mt -> it[StudentsTable.memberTypeId] = mt }
             signupDate?.let { sd -> it[StudentsTable.signupDate] = sd }
             isActive?.let { active -> it[StudentsTable.isActive] = active }
-            it[updatedAt] = LocalDateTime.now()
+            it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         }
 
         if (updateCount > 0) findById(id) else null
@@ -108,9 +111,9 @@ class StudentDao {
         phone = row[StudentsTable.phone],
         address = row[StudentsTable.address],
         memberTypeId = row[StudentsTable.memberTypeId].value,
-        signupDate = row[StudentsTable.signupDate]?.toString(),
+        signupDate = row[StudentsTable.signupDate],
         isActive = row[StudentsTable.isActive],
-        createdAt = row[StudentsTable.createdAt].toString(),
-        updatedAt = row[StudentsTable.updatedAt].toString()
+        createdAt = row[StudentsTable.createdAt],
+        updatedAt = row[StudentsTable.updatedAt]
     )
 }

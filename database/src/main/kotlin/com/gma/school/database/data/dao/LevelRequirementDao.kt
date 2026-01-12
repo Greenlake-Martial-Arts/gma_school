@@ -3,6 +3,9 @@ package com.gma.school.database.data.dao
 
 import com.gma.school.database.data.tables.LevelRequirementsTable
 import com.gma.tsunjo.school.domain.models.LevelRequirement
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
@@ -19,15 +22,18 @@ class LevelRequirementDao {
         levelSpecificNotes: String?,
         isRequired: Boolean
     ): LevelRequirement = transaction {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         val id = LevelRequirementsTable.insertAndGetId {
             it[LevelRequirementsTable.levelId] = levelId
             it[LevelRequirementsTable.moveId] = moveId
             it[LevelRequirementsTable.sortOrder] = sortOrder
             it[LevelRequirementsTable.levelSpecificNotes] = levelSpecificNotes
             it[LevelRequirementsTable.isRequired] = isRequired
+            it[LevelRequirementsTable.createdAt] = now
+            it[LevelRequirementsTable.updatedAt] = now
         }.value
 
-        LevelRequirement(id, levelId, moveId, sortOrder, levelSpecificNotes, isRequired)
+        LevelRequirement(id, levelId, moveId, sortOrder, levelSpecificNotes, isRequired, now, now)
     }
 
     fun findById(id: Long): LevelRequirement? = transaction {
@@ -59,6 +65,8 @@ class LevelRequirementDao {
         moveId = row[LevelRequirementsTable.moveId],
         sortOrder = row[LevelRequirementsTable.sortOrder],
         levelSpecificNotes = row[LevelRequirementsTable.levelSpecificNotes],
-        isRequired = row[LevelRequirementsTable.isRequired]
+        isRequired = row[LevelRequirementsTable.isRequired],
+        createdAt = row[LevelRequirementsTable.createdAt],
+        updatedAt = row[LevelRequirementsTable.updatedAt]
     )
 }

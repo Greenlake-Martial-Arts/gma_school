@@ -5,7 +5,10 @@ package com.gma.school.database.data.dao
 import com.gma.school.database.data.tables.AttendanceEntriesTable
 import com.gma.school.database.data.tables.AttendancesTable
 import com.gma.tsunjo.school.domain.models.Attendance
-import java.time.LocalDate
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
@@ -19,12 +22,14 @@ import org.jetbrains.exposed.sql.update
 
 class AttendanceDao {
     fun create(classDate: LocalDate, notes: String?): Attendance = transaction {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         val id = AttendancesTable.insertAndGetId {
             it[AttendancesTable.classDate] = classDate
             it[AttendancesTable.notes] = notes
+            it[AttendancesTable.createdAt] = now
         }.value
 
-        Attendance(id, classDate.toString(), notes)
+        Attendance(id, classDate, notes, now)
     }
 
     fun findById(id: Long): Attendance? = transaction {
@@ -95,7 +100,8 @@ class AttendanceDao {
 
     private fun toAttendance(row: ResultRow) = Attendance(
         id = row[AttendancesTable.id].value,
-        classDate = row[AttendancesTable.classDate].toString(),
-        notes = row[AttendancesTable.notes]
+        classDate = row[AttendancesTable.classDate],
+        notes = row[AttendancesTable.notes],
+        createdAt = row[AttendancesTable.createdAt]
     )
 }

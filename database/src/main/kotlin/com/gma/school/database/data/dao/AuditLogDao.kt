@@ -3,6 +3,9 @@ package com.gma.school.database.data.dao
 
 import com.gma.school.database.data.tables.AuditLogTable
 import com.gma.tsunjo.school.domain.models.AuditLog
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
@@ -19,6 +22,7 @@ class AuditLogDao {
         description: String?,
         userAgent: String?
     ): AuditLog = transaction {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         val id = AuditLogTable.insertAndGetId {
             it[AuditLogTable.userId] = userId
             it[AuditLogTable.action] = action
@@ -26,12 +30,10 @@ class AuditLogDao {
             it[AuditLogTable.entityId] = entityId
             it[AuditLogTable.description] = description
             it[AuditLogTable.userAgent] = userAgent
+            it[AuditLogTable.createdAt] = now
         }.value
 
-        val createdAt = AuditLogTable.select { AuditLogTable.id eq id }
-            .single()[AuditLogTable.createdAt]
-
-        AuditLog(id, userId, action, entity, entityId, description, userAgent, createdAt.toString())
+        AuditLog(id, userId, action, entity, entityId, description, userAgent, now)
     }
 
     fun findById(id: Long): AuditLog? = transaction {
@@ -61,6 +63,6 @@ class AuditLogDao {
         entityId = row[AuditLogTable.entityId],
         description = row[AuditLogTable.description],
         userAgent = row[AuditLogTable.userAgent],
-        createdAt = row[AuditLogTable.createdAt].toString()
+        createdAt = row[AuditLogTable.createdAt]
     )
 }
