@@ -8,6 +8,8 @@ import com.gma.tsunjo.school.domain.repositories.UserRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -19,6 +21,8 @@ class StudentServiceTest {
     private lateinit var userRepository: UserRepository
     private lateinit var studentService: StudentService
 
+    private val testDateTime = LocalDateTime.parse("2025-01-01T00:00:00")
+    private val testDate = LocalDate.parse("2025-01-01")
     private val testStudent = Student(
         id = 1L,
         userId = 100L,
@@ -27,10 +31,12 @@ class StudentServiceTest {
         lastName = "Doe",
         email = "john.doe@example.com",
         phone = "555-1234",
+        address = "123 Main St",
         memberTypeId = 1L,
+        signupDate = testDate,
         isActive = true,
-        createdAt = "2025-01-01T00:00:00",
-        updatedAt = "2025-01-01T00:00:00"
+        createdAt = testDateTime,
+        updatedAt = testDateTime
     )
 
     @Before
@@ -52,6 +58,8 @@ class StudentServiceTest {
                 "jane.doe@example.com",
                 null,
                 null,
+                null,
+                null,
                 null
             )
         } returns updatedStudent
@@ -64,7 +72,7 @@ class StudentServiceTest {
 
         assertNotNull(result)
         assertEquals("jane.doe@example.com", result.email)
-        verify { studentRepository.updateStudent(1L, null, null, null, "jane.doe@example.com", null, null, null) }
+        verify { studentRepository.updateStudent(1L, null, null, null, "jane.doe@example.com", null, null, null, null, null) }
         verify { userRepository.updateUser(100L, username = "jane.doe@example.com") }
     }
 
@@ -80,6 +88,8 @@ class StudentServiceTest {
                 "john.doe@example.com",
                 null,
                 null,
+                null,
+                null,
                 null
             )
         } returns updatedStudent
@@ -93,7 +103,7 @@ class StudentServiceTest {
 
         assertNotNull(result)
         assertEquals("Jane", result.firstName)
-        verify { studentRepository.updateStudent(1L, null, "Jane", null, "john.doe@example.com", null, null, null) }
+        verify { studentRepository.updateStudent(1L, null, "Jane", null, "john.doe@example.com", null, null, null, null, null) }
         verify { userRepository.updateUser(100L, username = "john.doe@example.com") }
     }
 
@@ -107,6 +117,8 @@ class StudentServiceTest {
                 "Jane",
                 null,
                 "jane.smith@example.com",
+                null,
+                null,
                 null,
                 null,
                 null
@@ -128,7 +140,7 @@ class StudentServiceTest {
         assertNotNull(result)
         assertEquals("Jane", result.firstName)
         assertEquals("jane.smith@example.com", result.email)
-        verify { studentRepository.updateStudent(1L, null, "Jane", null, "jane.smith@example.com", null, null, null) }
+        verify { studentRepository.updateStudent(1L, null, "Jane", null, "jane.smith@example.com", null, null, null, null, null) }
         verify { userRepository.updateUser(100L, username = "jane.smith@example.com") }
     }
 
@@ -143,7 +155,9 @@ class StudentServiceTest {
                 null,
                 "john.doe@example.com",
                 "555-9999",
+                null,
                 1L,
+                null,
                 null
             )
         } returns updatedStudent
@@ -158,7 +172,7 @@ class StudentServiceTest {
 
         assertNotNull(result)
         assertEquals("555-9999", result.phone)
-        verify { studentRepository.updateStudent(1L, null, null, null, "john.doe@example.com", "555-9999", 1L, null) }
+        verify { studentRepository.updateStudent(1L, null, null, null, "john.doe@example.com", "555-9999", null, 1L, null, null) }
         verify { userRepository.updateUser(100L, username = "john.doe@example.com") }
     }
 }

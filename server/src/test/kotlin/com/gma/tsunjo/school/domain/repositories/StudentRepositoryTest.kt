@@ -10,6 +10,8 @@ import com.gma.tsunjo.school.domain.models.Student
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -23,6 +25,8 @@ class StudentRepositoryTest {
     private lateinit var studentRepository: StudentRepository
 
     private val testMemberType = MemberType(id = 1L, name = "Regular")
+    private val testDateTime = LocalDateTime.parse("2023-01-01T10:00:00")
+    private val testDate = LocalDate.parse("2023-01-01")
     private val testStudent = Student(
         id = 1L,
         userId = 100L,
@@ -31,10 +35,12 @@ class StudentRepositoryTest {
         lastName = "Doe",
         email = "john.doe@example.com",
         phone = "555-1234",
+        address = "123 Main St",
         memberTypeId = 1L,
+        signupDate = testDate,
         isActive = true,
-        createdAt = "2025-01-01T00:00:00",
-        updatedAt = "2025-01-01T00:00:00"
+        createdAt = testDateTime,
+        updatedAt = testDateTime
     )
 
     @Before
@@ -89,7 +95,9 @@ class StudentRepositoryTest {
                 "Doe",
                 "john.doe@example.com",
                 "555-1234",
-                1L
+                "123 Main St",
+                1L,
+                testDate
             )
         } returns testStudent
 
@@ -100,12 +108,26 @@ class StudentRepositoryTest {
             lastName = "Doe",
             email = "john.doe@example.com",
             phone = "555-1234",
-            memberTypeId = 1L
+            address = "123 Main St",
+            memberTypeId = 1L,
+            signupDate = testDate
         )
 
         assertTrue(result.isSuccess)
         assertEquals(testStudent, result.getOrNull())
-        verify { studentDao.insert(100L, "EXT001", "John", "Doe", "john.doe@example.com", "555-1234", 1L) }
+        verify { 
+            studentDao.insert(
+                100L, 
+                "EXT001", 
+                "John", 
+                "Doe", 
+                "john.doe@example.com", 
+                "555-1234", 
+                "123 Main St", 
+                1L, 
+                testDate
+            ) 
+        }
     }
 
     @Test
@@ -119,7 +141,9 @@ class StudentRepositoryTest {
             lastName = "Doe",
             email = "john.doe@example.com",
             phone = null,
-            memberTypeId = 999L
+            address = null,
+            memberTypeId = 999L,
+            signupDate = null
         )
 
         assertTrue(result.isFailure)
@@ -138,7 +162,9 @@ class StudentRepositoryTest {
             lastName = "Smith",
             email = "john.doe@example.com",
             phone = null,
-            memberTypeId = 1L
+            address = null,
+            memberTypeId = 1L,
+            signupDate = null
         )
 
         assertTrue(result.isFailure)
@@ -158,7 +184,9 @@ class StudentRepositoryTest {
             lastName = "Smith",
             email = "jane.smith@example.com",
             phone = null,
-            memberTypeId = 1L
+            address = null,
+            memberTypeId = 1L,
+            signupDate = null
         )
 
         assertTrue(result.isFailure)
