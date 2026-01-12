@@ -6,17 +6,17 @@ dependencies {
     // Exposed ORM
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
-    implementation(libs.exposed.java.time)
-    
+    implementation(libs.exposed.kotlin.datetime)
+
     // MySQL driver
     implementation(libs.mysql.connector)
-    
+
     // Connection pooling
     implementation(libs.hikaricp)
-    
+
     // Shared models
     implementation(projects.shared)
-    
+
     testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.h2)
     testImplementation(libs.mockk)
