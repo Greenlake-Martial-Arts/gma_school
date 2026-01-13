@@ -6,6 +6,7 @@ import com.gma.school.database.data.dao.MemberTypeDao
 import com.gma.school.database.data.dao.StudentDao
 import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.models.Student
+import kotlinx.datetime.LocalDate
 
 class StudentRepository(
     private val studentDao: StudentDao,
@@ -27,7 +28,9 @@ class StudentRepository(
         lastName: String,
         email: String,
         phone: String?,
-        memberTypeId: Long
+        address: String?,
+        memberTypeId: Long,
+        signupDate: LocalDate?
     ): Result<Student> {
         return try {
             // Validate member type exists
@@ -48,7 +51,17 @@ class StudentRepository(
                 }
             }
 
-            val student = studentDao.insert(userId, externalCode, firstName, lastName, email, phone, memberTypeId)
+            val student = studentDao.insert(
+                userId,
+                externalCode,
+                firstName,
+                lastName,
+                email,
+                phone,
+                address,
+                memberTypeId,
+                signupDate
+            )
                 ?: return Result.failure(AppException.DatabaseError("Failed to create student"))
 
             Result.success(student)
@@ -66,7 +79,9 @@ class StudentRepository(
         lastName: String? = null,
         email: String? = null,
         phone: String? = null,
+        address: String? = null,
         memberTypeId: Long? = null,
+        signupDate: LocalDate? = null,
         isActive: Boolean? = null
     ): Student? {
         // Validate member type if provided
@@ -74,7 +89,18 @@ class StudentRepository(
             memberTypeDao.findById(mt) ?: return null
         }
 
-        return studentDao.update(id, externalCode, firstName, lastName, email, phone, memberTypeId, isActive)
+        return studentDao.update(
+            id,
+            externalCode,
+            firstName,
+            lastName,
+            email,
+            phone,
+            address,
+            memberTypeId,
+            signupDate,
+            isActive
+        )
     }
 
     fun setStudentActiveStatus(id: Long, isActive: Boolean): Boolean {

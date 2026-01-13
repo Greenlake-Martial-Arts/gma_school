@@ -4,7 +4,10 @@ package com.gma.school.database.data.dao
 
 import com.gma.school.database.data.tables.StudentsTable
 import com.gma.tsunjo.school.domain.models.Student
-import java.time.LocalDateTime
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -47,8 +50,11 @@ class StudentDao {
         lastName: String,
         email: String,
         phone: String?,
-        memberTypeId: Long
+        address: String?,
+        memberTypeId: Long,
+        signupDate: LocalDate?
     ): Student? = transaction {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         val insertStatement = StudentsTable.insert {
             it[StudentsTable.userId] = userId
             it[StudentsTable.externalCode] = externalCode
@@ -56,9 +62,11 @@ class StudentDao {
             it[StudentsTable.lastName] = lastName
             it[StudentsTable.email] = email
             it[StudentsTable.phone] = phone
+            it[StudentsTable.address] = address
             it[StudentsTable.memberTypeId] = memberTypeId
-            it[createdAt] = LocalDateTime.now()
-            it[updatedAt] = LocalDateTime.now()
+            it[StudentsTable.signupDate] = signupDate
+            it[createdAt] = now
+            it[updatedAt] = now
         }
 
         val id = insertStatement[StudentsTable.id].value
@@ -72,7 +80,9 @@ class StudentDao {
         lastName: String? = null,
         email: String? = null,
         phone: String? = null,
+        address: String? = null,
         memberTypeId: Long? = null,
+        signupDate: LocalDate? = null,
         isActive: Boolean? = null
     ): Student? = transaction {
         val updateCount = StudentsTable.update({ StudentsTable.id eq id }) {
@@ -81,9 +91,11 @@ class StudentDao {
             lastName?.let { ln -> it[StudentsTable.lastName] = ln }
             email?.let { e -> it[StudentsTable.email] = e }
             phone?.let { p -> it[StudentsTable.phone] = p }
+            address?.let { a -> it[StudentsTable.address] = a }
             memberTypeId?.let { mt -> it[StudentsTable.memberTypeId] = mt }
+            signupDate?.let { sd -> it[StudentsTable.signupDate] = sd }
             isActive?.let { active -> it[StudentsTable.isActive] = active }
-            it[updatedAt] = LocalDateTime.now()
+            it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         }
 
         if (updateCount > 0) findById(id) else null
@@ -97,9 +109,11 @@ class StudentDao {
         lastName = row[StudentsTable.lastName],
         email = row[StudentsTable.email],
         phone = row[StudentsTable.phone],
+        address = row[StudentsTable.address],
         memberTypeId = row[StudentsTable.memberTypeId].value,
+        signupDate = row[StudentsTable.signupDate],
         isActive = row[StudentsTable.isActive],
-        createdAt = row[StudentsTable.createdAt].toString(),
-        updatedAt = row[StudentsTable.updatedAt].toString()
+        createdAt = row[StudentsTable.createdAt],
+        updatedAt = row[StudentsTable.updatedAt]
     )
 }

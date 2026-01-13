@@ -2,7 +2,17 @@
 
 package com.gma.tsunjo.school.presentation.routes
 
+import com.gma.school.database.data.tables.AttendanceEntriesTable
+import com.gma.school.database.data.tables.AttendancesTable
+import com.gma.school.database.data.tables.AuditLogTable
+import com.gma.school.database.data.tables.LevelRequirementsTable
+import com.gma.school.database.data.tables.LevelsTable
+import com.gma.school.database.data.tables.MemberTypesTable
+import com.gma.school.database.data.tables.MoveCategoriesTable
+import com.gma.school.database.data.tables.MovesTable
 import com.gma.school.database.data.tables.RolesTable
+import com.gma.school.database.data.tables.StudentLevelsTable
+import com.gma.school.database.data.tables.StudentProgressTable
 import com.gma.school.database.data.tables.StudentsTable
 import com.gma.school.database.data.tables.UserRolesTable
 import com.gma.school.database.data.tables.UsersTable
@@ -35,7 +45,27 @@ abstract class BaseIntegrationTest {
 
         // Create all required tables in correct order (dependencies first)
         transaction(testDatabase) {
-            SchemaUtils.createMissingTablesAndColumns(StudentsTable, RolesTable, UsersTable, UserRolesTable)
+            SchemaUtils.createMissingTablesAndColumns(
+                // Lookup tables first
+                RolesTable,
+                MemberTypesTable,
+                MoveCategoriesTable,
+
+                // Core entities
+                UsersTable,
+                UserRolesTable,
+                StudentsTable,
+                LevelsTable,
+                MovesTable,
+
+                // Relationship tables
+                LevelRequirementsTable,
+                StudentLevelsTable,
+                AttendancesTable,
+                AttendanceEntriesTable,
+                StudentProgressTable,
+                AuditLogTable
+            )
 
             // Insert default STUDENT role if it doesn't exist
             if (RolesTable.selectAll().count() == 0L) {

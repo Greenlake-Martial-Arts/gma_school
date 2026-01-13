@@ -2,6 +2,7 @@
 
 package com.gma.tsunjo.school.api.requests
 
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,5 +12,7 @@ data class CreateStudentRequest(
     val lastName: String,
     val email: String,
     val phone: String? = null,
-    val memberTypeId: Long
+    val address: String? = null,
+    val memberTypeId: Long,
+    val signupDate: LocalDate? = null
 )

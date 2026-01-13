@@ -7,6 +7,7 @@ import com.gma.tsunjo.school.domain.models.Student
 import com.gma.tsunjo.school.domain.repositories.StudentRepository
 import com.gma.tsunjo.school.domain.repositories.UserRepository
 import java.util.UUID
+import kotlinx.datetime.LocalDate
 
 class StudentService(
     private val studentRepository: StudentRepository,
@@ -19,7 +20,9 @@ class StudentService(
         lastName: String,
         email: String,
         phone: String?,
-        memberTypeId: Long
+        address: String?,
+        memberTypeId: Long,
+        signupDate: LocalDate?
     ): Result<Student> {
         return try {
             // Create user first (required for every student)
@@ -35,7 +38,17 @@ class StudentService(
             val user = userResult.getOrThrow()
 
             // Create student with user reference
-            studentRepository.createStudent(user.id, externalCode, firstName, lastName, email, phone, memberTypeId)
+            studentRepository.createStudent(
+                user.id,
+                externalCode,
+                firstName,
+                lastName,
+                email,
+                phone,
+                address,
+                memberTypeId,
+                signupDate
+            )
         } catch (e: Exception) {
             Result.failure(AppException.DatabaseError("Error creating student with user", e))
         }
@@ -48,11 +61,24 @@ class StudentService(
         lastName: String? = null,
         email: String,
         phone: String? = null,
+        address: String? = null,
         memberTypeId: Long? = null,
+        signupDate: LocalDate? = null,
         isActive: Boolean? = null
     ): Student? {
         val updatedStudent =
-            studentRepository.updateStudent(id, externalCode, firstName, lastName, email, phone, memberTypeId, isActive)
+            studentRepository.updateStudent(
+                id,
+                externalCode,
+                firstName,
+                lastName,
+                email,
+                phone,
+                address,
+                memberTypeId,
+                signupDate,
+                isActive
+            )
 
         // Update associated user's username if email provided (UI always sends current email)
         if (updatedStudent != null) {

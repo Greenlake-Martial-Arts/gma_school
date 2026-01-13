@@ -93,7 +93,9 @@ fun Route.createStudent(logger: Logger) {
             lastName = request.lastName,
             email = request.email,
             phone = request.phone,
-            memberTypeId = request.memberTypeId
+            address = request.address,
+            memberTypeId = request.memberTypeId,
+            signupDate = request.signupDate
         ).fold(
             onSuccess = { student ->
                 call.respond(HttpStatusCode.Created, student)

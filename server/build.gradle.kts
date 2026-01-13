@@ -16,7 +16,7 @@ application {
 dependencies {
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
-    implementation(libs.exposed.java.time)
+    implementation(libs.exposed.kotlin.datetime)
 
     implementation(projects.shared)
     implementation(projects.database)
@@ -27,14 +27,14 @@ dependencies {
     implementation(libs.ktor.serverCompression)
     implementation(libs.ktor.serializationKotlinxJson)
     implementation(libs.ktor.serverHostJvm)
-    
+
     // Configuration
     implementation(libs.typesafe.config)
-    
+
     // Koin for Ktor
     implementation(libs.koin.ktor)
     implementation(libs.koin.logger.slf4j)
-    
+
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.mockk)

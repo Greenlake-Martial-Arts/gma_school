@@ -5,6 +5,9 @@ package com.gma.school.database.data.dao
 import com.gma.school.database.data.tables.MemberTypesTable
 import com.gma.school.database.data.tables.StudentsTable
 import com.gma.school.database.data.tables.UsersTable
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
@@ -26,29 +29,36 @@ class StudentDaoTest {
 
     @Before
     fun setup() {
+        // 1. Create in-memory H2 database for testing
         database = Database.connect(
             url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;",
             driver = "org.h2.Driver"
         )
 
         transaction {
+            // 2. Create the database tables
             SchemaUtils.create(UsersTable, MemberTypesTable, StudentsTable)
 
-            // Insert test users for foreign key references
+            val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+
+            // 3. Insert test USERS (for foreign key references)
             for (i in 1..10) {
                 UsersTable.insert {
                     it[username] = "user$i@test.com"
                     it[passwordHash] = "hash$i"
+                    it[createdAt] = now
+                    it[updatedAt] = now
                 }
             }
 
-            // Insert test member type
+            // 4. Insert 1 test MEMBER TYPE (for foreign key references)
             val insertStatement = MemberTypesTable.insert {
                 it[name] = "Regular"
             }
             memberTypeId = insertStatement[MemberTypesTable.id].value
         }
 
+        // 5. Create DAO instances
         studentDao = StudentDao()
         memberTypeDao = MemberTypeDao()
     }
@@ -62,6 +72,7 @@ class StudentDaoTest {
 
     @Test
     fun `should create and find student by id`() {
+        // STEP 1: Create a student using the DAO
         val student = studentDao.insert(
             userId = 1L,
             externalCode = "EXT001",
@@ -69,9 +80,12 @@ class StudentDaoTest {
             lastName = "Doe",
             email = "john.doe@example.com",
             phone = "555-1234",
-            memberTypeId = memberTypeId
+            address = "",
+            memberTypeId = memberTypeId,
+            signupDate = null
         )
 
+        // STEP 2: Verify the created student has correct data
         assertNotNull(student)
         assertEquals(1L, student.userId)
         assertEquals("John", student.firstName)
@@ -80,6 +94,7 @@ class StudentDaoTest {
         assertEquals("EXT001", student.externalCode)
         assertTrue(student.isActive)
 
+        // STEP 3: Test the findById method
         val found = studentDao.findById(student.id)
         assertNotNull(found)
         assertEquals(student.id, found.id)
@@ -96,7 +111,9 @@ class StudentDaoTest {
             lastName = "Smith",
             email = email,
             phone = null,
-            memberTypeId = memberTypeId
+            address = "",
+            memberTypeId = memberTypeId,
+            signupDate = null
         )
 
         val found = studentDao.findByEmail(email)
@@ -116,7 +133,9 @@ class StudentDaoTest {
             lastName = "Wilson",
             email = "bob.wilson@email.com",
             phone = null,
-            memberTypeId = memberTypeId
+            address = "",
+            memberTypeId = memberTypeId,
+            signupDate = null
         )
 
         val found = studentDao.findByExternalCode(externalCode)
@@ -134,8 +153,10 @@ class StudentDaoTest {
             firstName = "Original",
             lastName = "Name",
             email = "original.name@email.com",
+            address = "",
             phone = null,
-            memberTypeId = memberTypeId
+            memberTypeId = memberTypeId,
+            signupDate = null
         )!!
 
         val updated = studentDao.update(
@@ -162,8 +183,10 @@ class StudentDaoTest {
             firstName = "Active",
             lastName = "Student",
             email = "active.student@email.com",
+            address = "",
             phone = null,
-            memberTypeId = memberTypeId
+            memberTypeId = memberTypeId,
+            signupDate = null
         )
 
         // Create inactive student
@@ -173,8 +196,10 @@ class StudentDaoTest {
             firstName = "Inactive",
             lastName = "Student",
             email = "inactive.student@email.com",
+            address = "",
             phone = null,
-            memberTypeId = memberTypeId
+            memberTypeId = memberTypeId,
+            signupDate = null
         )!!
 
         studentDao.update(inactive.id, isActive = false)
@@ -198,8 +223,10 @@ class StudentDaoTest {
             firstName = "Test",
             lastName = "User",
             email = "test.user@email.com",
+            address = "",
             phone = null,
-            memberTypeId = memberTypeId
+            memberTypeId = memberTypeId,
+            signupDate = null
         )!!
 
         val found = studentDao.findById(student.id)

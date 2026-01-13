@@ -2,6 +2,8 @@
 
 package com.gma.tsunjo.school.domain.models
 
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -13,8 +15,10 @@ data class Student(
     val lastName: String,
     val email: String,
     val phone: String?,
+    val address: String?,
     val memberTypeId: Long,
+    val signupDate: LocalDate?,
     val isActive: Boolean,
-    val createdAt: String,
-    val updatedAt: String
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime?
 )

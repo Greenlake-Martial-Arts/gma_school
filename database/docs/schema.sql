@@ -36,7 +36,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     is_active     TINYINT(1) NOT NULL DEFAULT '1',
     created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at    DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_user_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -62,7 +62,9 @@ CREATE TABLE students (
     last_name      VARCHAR(100) NOT NULL,
     email          VARCHAR(255) UNIQUE,
     phone          VARCHAR(30),
+    address        TEXT,
     member_type_id BIGINT NOT NULL,
+    signup_date    DATE COMMENT 'Original sign-up date when student first joined',
     is_active      TINYINT(1) NOT NULL DEFAULT '1',
     created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -83,7 +85,7 @@ CREATE TABLE levels (
     order_seq    INT NOT NULL,
     description  TEXT,
     created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at   DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_level_order (order_seq)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -107,7 +109,7 @@ CREATE TABLE level_requirements (
     level_specific_notes TEXT,
     is_required          TINYINT(1) DEFAULT '1',
     created_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at           DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY level_id (level_id, move_id),
     KEY fk_lr_move (move_id),
     KEY idx_requirement_sort (level_id, sort_order),
@@ -176,23 +178,3 @@ CREATE TABLE audit_log (
     KEY fk_audit_user (user_id),
     CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- INITIAL DATA INSERTS
--- ============================================================================
-
--- Default roles
-INSERT INTO roles (name) VALUES
-('ADMIN'),
-('INSTRUCTOR'),
-('DIRECTOR'),
-('STUDENT');
-
--- Default member types
-INSERT INTO member_types (name) VALUES
-('Regular'),
-('Prospect'),
-('Women\'s self defense'),
-('Instructor'),
-('Workshop'),
-('Parent');
