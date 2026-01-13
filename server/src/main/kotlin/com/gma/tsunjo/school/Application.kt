@@ -7,6 +7,11 @@ package com.gma.tsunjo.school
 import com.gma.school.database.DatabaseFactory
 import com.gma.school.database.config.DatabaseConfig
 import com.gma.tsunjo.school.di.appModule
+import com.gma.tsunjo.school.presentation.routes.attendanceRoutes
+import com.gma.tsunjo.school.presentation.routes.levelRoutes
+import com.gma.tsunjo.school.presentation.routes.memberTypeRoutes
+import com.gma.tsunjo.school.presentation.routes.moveCategoryRoutes
+import com.gma.tsunjo.school.presentation.routes.moveRoutes
 import com.gma.tsunjo.school.presentation.routes.studentRoutes
 import com.gma.tsunjo.school.presentation.routes.userRoutes
 import com.typesafe.config.ConfigFactory
@@ -62,6 +67,11 @@ fun Application.configureRouting() {
 
     userRoutes()
     studentRoutes()
+    memberTypeRoutes()
+    levelRoutes()
+    moveCategoryRoutes()
+    moveRoutes()
+    attendanceRoutes()
 }
 
 fun Application.setupConfig(logger: Logger) {
