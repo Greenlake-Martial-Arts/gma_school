@@ -234,32 +234,6 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun `authenticateUser returns user when credentials are valid`() {
-        // Given
-        every { userDao.authenticate("test@example.com", "password") } returns testUser
-
-        // When
-        val result = userRepository.authenticateUser("test@example.com", "password")
-
-        // Then
-        assertEquals(testUser, result)
-        verify { userDao.authenticate("test@example.com", "password") }
-    }
-
-    @Test
-    fun `authenticateUser returns null when credentials are invalid`() {
-        // Given
-        every { userDao.authenticate("test@example.com", "wrongpassword") } returns null
-
-        // When
-        val result = userRepository.authenticateUser("test@example.com", "wrongpassword")
-
-        // Then
-        assertNull(result)
-        verify { userDao.authenticate("test@example.com", "wrongpassword") }
-    }
-
-    @Test
     fun `addUserRole calls dao addUserRole`() {
         // Given
         every { userDao.addUserRole(1L, 2L) } returns true

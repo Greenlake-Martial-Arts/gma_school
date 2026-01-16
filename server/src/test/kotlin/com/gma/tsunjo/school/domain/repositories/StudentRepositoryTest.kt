@@ -2,8 +2,10 @@
 
 package com.gma.tsunjo.school.domain.repositories
 
+import com.gma.school.database.data.dao.LevelDao
 import com.gma.school.database.data.dao.MemberTypeDao
 import com.gma.school.database.data.dao.StudentDao
+import com.gma.school.database.data.dao.StudentLevelDao
 import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.models.MemberType
 import com.gma.tsunjo.school.domain.models.Student
@@ -22,6 +24,8 @@ class StudentRepositoryTest {
 
     private lateinit var studentDao: StudentDao
     private lateinit var memberTypeDao: MemberTypeDao
+    private lateinit var studentLevelDao: StudentLevelDao
+    private lateinit var levelDao: LevelDao
     private lateinit var studentRepository: StudentRepository
 
     private val testMemberType = MemberType(id = 1L, name = "Regular")
@@ -47,7 +51,9 @@ class StudentRepositoryTest {
     fun setup() {
         studentDao = mockk()
         memberTypeDao = mockk()
-        studentRepository = StudentRepository(studentDao, memberTypeDao)
+        studentLevelDao = mockk(relaxed = true)
+        levelDao = mockk()
+        studentRepository = StudentRepository(studentDao, memberTypeDao, studentLevelDao, levelDao)
     }
 
     @Test
@@ -84,6 +90,16 @@ class StudentRepositoryTest {
 
     @Test
     fun `should create student successfully`() {
+        val testLevel = com.gma.tsunjo.school.domain.models.Level(
+            id = 1L,
+            code = "BASIC",
+            displayName = "Basic",
+            orderSeq = 1,
+            description = null,
+            createdAt = testDateTime,
+            updatedAt = testDateTime
+        )
+
         every { memberTypeDao.findById(1L) } returns testMemberType
         every { studentDao.findByEmail("john.doe@example.com") } returns null
         every { studentDao.findByExternalCode("EXT001") } returns null
@@ -100,6 +116,7 @@ class StudentRepositoryTest {
                 testDate
             )
         } returns testStudent
+        every { levelDao.findByCode("BASIC") } returns testLevel
 
         val result = studentRepository.createStudent(
             userId = 100L,
@@ -115,18 +132,18 @@ class StudentRepositoryTest {
 
         assertTrue(result.isSuccess)
         assertEquals(testStudent, result.getOrNull())
-        verify { 
+        verify {
             studentDao.insert(
-                100L, 
-                "EXT001", 
-                "John", 
-                "Doe", 
-                "john.doe@example.com", 
-                "555-1234", 
-                "123 Main St", 
-                1L, 
+                100L,
+                "EXT001",
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "555-1234",
+                "123 Main St",
+                1L,
                 testDate
-            ) 
+            )
         }
     }
 
