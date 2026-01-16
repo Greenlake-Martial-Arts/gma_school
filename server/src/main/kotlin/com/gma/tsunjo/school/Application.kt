@@ -6,8 +6,10 @@ package com.gma.tsunjo.school
 
 import com.gma.school.database.DatabaseFactory
 import com.gma.school.database.config.DatabaseConfig
+import com.gma.tsunjo.school.config.configureJwtAuthentication
 import com.gma.tsunjo.school.di.appModule
 import com.gma.tsunjo.school.presentation.routes.attendanceRoutes
+import com.gma.tsunjo.school.presentation.routes.authRoutes
 import com.gma.tsunjo.school.presentation.routes.levelRoutes
 import com.gma.tsunjo.school.presentation.routes.memberTypeRoutes
 import com.gma.tsunjo.school.presentation.routes.moveCategoryRoutes
@@ -15,15 +17,21 @@ import com.gma.tsunjo.school.presentation.routes.moveRoutes
 import com.gma.tsunjo.school.presentation.routes.studentRoutes
 import com.gma.tsunjo.school.presentation.routes.userRoutes
 import com.typesafe.config.ConfigFactory
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.plugins.callid.CallId
+import io.ktor.server.plugins.callid.callIdMdc
+import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.compression.Compression
 import io.ktor.server.plugins.compression.gzip
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.uri
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
@@ -32,6 +40,7 @@ import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.event.Level
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -40,6 +49,7 @@ fun Application.module() {
 
     configurePlugins()
     setupConfig(logger)
+    configureJwtAuthentication()
     configureRouting()
 }
 
@@ -56,6 +66,58 @@ fun Application.configurePlugins() {
     install(Compression) {
         gzip()
     }
+
+    install(CallId) {
+        header(HttpHeaders.XRequestId)
+        replyToHeader(HttpHeaders.XRequestId)
+        verify { callId: String ->
+            callId.isNotEmpty()
+        }
+    }
+
+    install(CallLogging) {
+        level = Level.INFO
+        callIdMdc("call-id")
+
+        format { call ->
+            val status = call.response.status()
+            val httpMethod = call.request.httpMethod.value
+            val uri = call.request.uri
+            val userAgent = call.request.headers["User-Agent"]
+            val contentType = call.request.headers["Content-Type"]
+            val authorization = call.request.headers["Authorization"]?.let {
+                if (it.startsWith("Bearer")) "Bearer ***" else "***"
+            }
+            val accept = call.request.headers["Accept"]
+            val xForwardedFor = call.request.headers["X-Forwarded-For"]
+            val host = call.request.headers["Host"]
+            val origin = call.request.headers["Origin"]
+            val referer = call.request.headers["Referer"]
+
+            buildString {
+                append("$status: $httpMethod $uri")
+                userAgent?.let { append(" | User-Agent: $it") }
+                contentType?.let { append(" | Content-Type: $it") }
+                authorization?.let { append(" | Authorization: $it") }
+                accept?.let { append(" | Accept: $it") }
+                host?.let { append(" | Host: $it") }
+                xForwardedFor?.let { append(" | X-Forwarded-For: $it") }
+                origin?.let { append(" | Origin: $it") }
+                referer?.let { append(" | Referer: $it") }
+
+                // Add any custom headers that start with X-
+                call.request.headers.entries().forEach { (name, values) ->
+                    if (name.startsWith("X-") && name != "X-Forwarded-For") {
+                        append(" | $name: ${values.joinToString(", ")}")
+                    }
+                }
+            }
+        }
+
+        filter { call ->
+            !call.request.uri.startsWith("/static")
+        }
+    }
 }
 
 fun Application.configureRouting() {
@@ -65,6 +127,7 @@ fun Application.configureRouting() {
         }
     }
 
+    authRoutes()
     userRoutes()
     studentRoutes()
     memberTypeRoutes()

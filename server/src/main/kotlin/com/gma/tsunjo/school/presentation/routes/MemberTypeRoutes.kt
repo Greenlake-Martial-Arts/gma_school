@@ -6,6 +6,7 @@ import com.gma.tsunjo.school.domain.repositories.MemberTypeRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -19,9 +20,11 @@ fun Application.memberTypeRoutes() {
     val logger = LoggerFactory.getLogger(javaClass)
     routing {
         logger.debug("<<<< memberTypeRoutes")
-        route("/member-types") {
-            getMemberTypes(logger)
-            getMemberTypeById(logger)
+        authenticate("auth-jwt") {
+            route("/member-types") {
+                getMemberTypes(logger)
+                getMemberTypeById(logger)
+            }
         }
     }
 }

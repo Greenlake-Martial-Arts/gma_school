@@ -22,7 +22,8 @@ class StudentService(
         phone: String?,
         address: String?,
         memberTypeId: Long,
-        signupDate: LocalDate?
+        signupDate: LocalDate?,
+        initialLevelCode: String? = null
     ): Result<Student> {
         return try {
             // Create user first (required for every student)
@@ -47,7 +48,8 @@ class StudentService(
                 phone,
                 address,
                 memberTypeId,
-                signupDate
+                signupDate,
+                initialLevelCode
             )
         } catch (e: Exception) {
             Result.failure(AppException.DatabaseError("Error creating student with user", e))

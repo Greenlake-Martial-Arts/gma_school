@@ -14,5 +14,6 @@ data class CreateStudentRequest(
     val phone: String? = null,
     val address: String? = null,
     val memberTypeId: Long,
-    val signupDate: LocalDate? = null
+    val signupDate: LocalDate? = null,
+    val initialLevelCode: String? = null  // Optional: defaults to "BASIC" or "TEEN_BASIC" based on member type
 )

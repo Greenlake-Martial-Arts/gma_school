@@ -83,7 +83,16 @@ class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao)
         return updated != null
     }
 
-    fun authenticateUser(username: String, password: String): User? {
-        return userDao.authenticate(username, password)
+    fun authenticateUser(username: String, password: String): Result<User> {
+        return try {
+            val user = userDao.authenticate(username, password)
+            if (user != null) {
+                Result.success(user)
+            } else {
+                Result.failure(AppException.ValidationError("Invalid username or password"))
+            }
+        } catch (e: Exception) {
+            Result.failure(AppException.DatabaseError("Authentication error", e))
+        }
     }
 }

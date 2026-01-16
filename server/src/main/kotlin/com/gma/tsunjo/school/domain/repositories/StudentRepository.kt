@@ -2,15 +2,19 @@
 
 package com.gma.tsunjo.school.domain.repositories
 
+import com.gma.school.database.data.dao.LevelDao
 import com.gma.school.database.data.dao.MemberTypeDao
 import com.gma.school.database.data.dao.StudentDao
+import com.gma.school.database.data.dao.StudentLevelDao
 import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.models.Student
 import kotlinx.datetime.LocalDate
 
 class StudentRepository(
     private val studentDao: StudentDao,
-    private val memberTypeDao: MemberTypeDao
+    private val memberTypeDao: MemberTypeDao,
+    private val studentLevelDao: StudentLevelDao,
+    private val levelDao: LevelDao
 ) {
 
     fun getAllStudents(): List<Student> = studentDao.findAll()
@@ -30,7 +34,8 @@ class StudentRepository(
         phone: String?,
         address: String?,
         memberTypeId: Long,
-        signupDate: LocalDate?
+        signupDate: LocalDate?,
+        initialLevelCode: String? = null
     ): Result<Student> {
         return try {
             // Validate member type exists
@@ -63,6 +68,14 @@ class StudentRepository(
                 signupDate
             )
                 ?: return Result.failure(AppException.DatabaseError("Failed to create student"))
+
+            // Assign initial level
+            val levelCode = initialLevelCode ?: "BASIC"
+            val level = levelDao.findByCode(levelCode)
+            if (level != null) {
+                studentLevelDao.assign(student.id, level.id)
+            }
+            // If level not found, student is created without level assignment (can be assigned later)
 
             Result.success(student)
         } catch (e: AppException) {

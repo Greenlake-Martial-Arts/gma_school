@@ -10,6 +10,7 @@ import com.gma.tsunjo.school.presentation.extensions.respondWithError
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -27,14 +28,16 @@ fun Application.studentRoutes() {
     val logger = LoggerFactory.getLogger(javaClass)
     routing {
         logger.debug("<<<< studentRoutes")
-        route("/students") {
-            getStudents(logger)
-            getActiveStudents(logger)
-            getStudentById(logger)
-            createStudent(logger)
-            updateStudent(logger)
-            deactivateStudent(logger)
-            activateStudent(logger)
+        authenticate("auth-jwt") {
+            route("/students") {
+                getStudents(logger)
+                getActiveStudents(logger)
+                getStudentById(logger)
+                createStudent(logger)
+                updateStudent(logger)
+                deactivateStudent(logger)
+                activateStudent(logger)
+            }
         }
     }
 }
@@ -95,7 +98,8 @@ fun Route.createStudent(logger: Logger) {
             phone = request.phone,
             address = request.address,
             memberTypeId = request.memberTypeId,
-            signupDate = request.signupDate
+            signupDate = request.signupDate,
+            initialLevelCode = request.initialLevelCode
         ).fold(
             onSuccess = { student ->
                 call.respond(HttpStatusCode.Created, student)

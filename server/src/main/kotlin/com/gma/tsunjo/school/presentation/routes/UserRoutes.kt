@@ -3,13 +3,13 @@
 package com.gma.tsunjo.school.presentation.routes
 
 import com.gma.tsunjo.school.api.requests.CreateUserRequest
-import com.gma.tsunjo.school.api.requests.LoginRequest
 import com.gma.tsunjo.school.api.requests.UpdateUserRequest
 import com.gma.tsunjo.school.domain.repositories.UserRepository
 import com.gma.tsunjo.school.presentation.extensions.respondWithError
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -28,17 +28,14 @@ fun Application.userRoutes() {
     routing {
         logger.debug("<<<< userRoutes")
         route("/users") {
-            getUsers(logger)
-            getActiveUsers(logger)
-            getUserById(logger)
-            createUser(logger)
-            updateUser(logger)
-            deactivateUser(logger)
-            activateUser(logger)
-        }
-
-        route("/auth") {
-            loginUser(logger)
+            authenticate("auth-jwt") {
+                getUsers(logger)
+                getActiveUsers(logger)
+                getUserById(logger)
+                updateUser(logger)
+                deactivateUser(logger)
+                activateUser(logger)
+            }
         }
     }
 }
@@ -171,22 +168,6 @@ fun Route.activateUser(logger: Logger) {
             call.respond(HttpStatusCode.OK, "User activated")
         } else {
             call.respond(HttpStatusCode.NotFound, "User not found")
-        }
-    }
-}
-
-fun Route.loginUser(logger: Logger) {
-    val userRepository by inject<UserRepository>()
-
-    post("/login") {
-        logger.debug("POST /auth/login")
-        val request = call.receive<LoginRequest>()
-
-        val user = userRepository.authenticateUser(request.username, request.password)
-        if (user != null) {
-            call.respond(HttpStatusCode.OK, user)
-        } else {
-            call.respond(HttpStatusCode.Unauthorized, "Invalid credentials or inactive user")
         }
     }
 }

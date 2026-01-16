@@ -8,6 +8,7 @@ import com.gma.tsunjo.school.presentation.extensions.respondWithError
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -26,16 +27,18 @@ fun Application.attendanceRoutes() {
     val logger = LoggerFactory.getLogger(javaClass)
     routing {
         logger.debug("<<<< attendanceRoutes")
-        route("/attendance") {
-            getAttendances(logger)
-            getAttendanceById(logger)
-            getAttendancesByDateRange(logger)
-            createAttendance(logger)
-            updateAttendance(logger)
-            deleteAttendance(logger)
-            addStudentToAttendance(logger)
-            removeStudentFromAttendance(logger)
-            getStudentsInAttendance(logger)
+        authenticate("auth-jwt") {
+            route("/attendance") {
+                getAttendances(logger)
+                getAttendanceById(logger)
+                getAttendancesByDateRange(logger)
+                createAttendance(logger)
+                updateAttendance(logger)
+                deleteAttendance(logger)
+                addStudentToAttendance(logger)
+                removeStudentFromAttendance(logger)
+                getStudentsInAttendance(logger)
+            }
         }
     }
 }
