@@ -31,11 +31,13 @@ fun Application.attendanceRoutes() {
             route("/attendance") {
                 getAttendances(logger)
                 getAttendanceById(logger)
+                getAttendanceWithStudents(logger)
                 getAttendancesByDateRange(logger)
                 createAttendance(logger)
                 updateAttendance(logger)
                 deleteAttendance(logger)
                 addStudentToAttendance(logger)
+                addStudentsToAttendanceBulk(logger)
                 removeStudentFromAttendance(logger)
                 getStudentsInAttendance(logger)
             }
@@ -175,6 +177,25 @@ fun Route.addStudentToAttendance(logger: Logger) {
     }
 }
 
+fun Route.addStudentsToAttendanceBulk(logger: Logger) {
+    val attendanceRepository by inject<AttendanceRepository>()
+
+    post("/{id}/students/bulk") {
+        val id = call.parameters["id"]?.toLongOrNull()
+        logger.debug("POST /attendance/$id/students/bulk")
+
+        if (id == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid attendance ID")
+            return@post
+        }
+
+        val request = call.receive<com.gma.tsunjo.school.api.requests.BulkAddStudentsRequest>()
+        val count = attendanceRepository.addStudentsToAttendance(id, request.studentIds)
+
+        call.respond(HttpStatusCode.OK, mapOf("added" to count, "total" to request.studentIds.size))
+    }
+}
+
 fun Route.removeStudentFromAttendance(logger: Logger) {
     val attendanceRepository by inject<AttendanceRepository>()
 
@@ -212,5 +233,26 @@ fun Route.getStudentsInAttendance(logger: Logger) {
 
         val studentIds = attendanceRepository.getStudentsInAttendance(id)
         call.respond(studentIds)
+    }
+}
+
+fun Route.getAttendanceWithStudents(logger: Logger) {
+    val attendanceRepository by inject<AttendanceRepository>()
+
+    get("/{id}/with-students") {
+        val id = call.parameters["id"]?.toLongOrNull()
+        logger.debug("GET /attendance/$id/with-students")
+
+        if (id == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+            return@get
+        }
+
+        val attendanceWithStudents = attendanceRepository.getAttendanceWithStudents(id)
+        if (attendanceWithStudents != null) {
+            call.respond(attendanceWithStudents)
+        } else {
+            call.respond(HttpStatusCode.NotFound, "Attendance not found")
+        }
     }
 }

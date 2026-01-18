@@ -60,10 +60,12 @@ class StudentRepositoryTest {
     fun `should get all students`() {
         val students = listOf(testStudent)
         every { studentDao.findAll() } returns students
+        every { studentLevelDao.findByStudent(any()) } returns null
 
         val result = studentRepository.getAllStudents()
 
-        assertEquals(students, result)
+        assertEquals(1, result.size)
+        assertEquals(testStudent, result[0].student)
         verify { studentDao.findAll() }
     }
 
@@ -71,20 +73,24 @@ class StudentRepositoryTest {
     fun `should get active students`() {
         val students = listOf(testStudent)
         every { studentDao.findAllActive() } returns students
+        every { studentLevelDao.findByStudent(any()) } returns null
 
         val result = studentRepository.getActiveStudents()
 
-        assertEquals(students, result)
+        assertEquals(1, result.size)
+        assertEquals(testStudent, result[0].student)
         verify { studentDao.findAllActive() }
     }
 
     @Test
     fun `should get student by id`() {
         every { studentDao.findById(1L) } returns testStudent
+        every { studentLevelDao.findByStudent(1L) } returns null
 
         val result = studentRepository.getStudentById(1L)
 
-        assertEquals(testStudent, result)
+        assertNotNull(result)
+        assertEquals(testStudent, result.student)
         verify { studentDao.findById(1L) }
     }
 

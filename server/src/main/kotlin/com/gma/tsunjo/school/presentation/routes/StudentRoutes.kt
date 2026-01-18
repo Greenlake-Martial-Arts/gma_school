@@ -32,6 +32,7 @@ fun Application.studentRoutes() {
             route("/students") {
                 getStudents(logger)
                 getActiveStudents(logger)
+                getStudentsByLevel(logger)
                 getStudentById(logger)
                 createStudent(logger)
                 updateStudent(logger)
@@ -58,6 +59,23 @@ fun Route.getActiveStudents(logger: Logger) {
     get("/active") {
         logger.debug("GET /students/active")
         val students = studentRepository.getActiveStudents()
+        call.respond(students)
+    }
+}
+
+fun Route.getStudentsByLevel(logger: Logger) {
+    val studentRepository by inject<StudentRepository>()
+
+    get("/level/{levelId}") {
+        val levelId = call.parameters["levelId"]?.toLongOrNull()
+        logger.debug("GET /students/level/$levelId")
+
+        if (levelId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid level ID")
+            return@get
+        }
+
+        val students = studentRepository.getStudentsByLevel(levelId)
         call.respond(students)
     }
 }

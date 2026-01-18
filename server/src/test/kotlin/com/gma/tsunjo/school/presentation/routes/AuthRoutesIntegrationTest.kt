@@ -20,14 +20,14 @@ class AuthRoutesIntegrationTest : BaseIntegrationTest() {
     @Test
     fun `POST auth login with valid credentials returns 200`() = withTestApp {
         // First create a user
-        val createRequest = CreateUserRequest("login@example.com", "password123")
+        val createRequest = CreateUserRequest("login@example.com", "cGFzc3dvcmQxMjM=")
         client.post("/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), createRequest))
         }
 
         // Login with correct credentials
-        val loginRequest = LoginRequest("login@example.com", "password123")
+        val loginRequest = LoginRequest("login@example.com", "cGFzc3dvcmQxMjM=")
         val response = client.post("/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(LoginRequest.serializer(), loginRequest))
@@ -38,7 +38,7 @@ class AuthRoutesIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `POST auth login with invalid email returns 401`() = withTestApp {
-        val request = LoginRequest("nonexistent@example.com", "password123")
+        val request = LoginRequest("nonexistent@example.com", "cGFzc3dvcmQxMjM=")
         val response = client.post("/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(LoginRequest.serializer(), request))

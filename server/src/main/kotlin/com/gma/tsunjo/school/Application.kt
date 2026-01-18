@@ -14,6 +14,7 @@ import com.gma.tsunjo.school.presentation.routes.levelRoutes
 import com.gma.tsunjo.school.presentation.routes.memberTypeRoutes
 import com.gma.tsunjo.school.presentation.routes.moveCategoryRoutes
 import com.gma.tsunjo.school.presentation.routes.moveRoutes
+import com.gma.tsunjo.school.presentation.routes.studentProgressRoutes
 import com.gma.tsunjo.school.presentation.routes.studentRoutes
 import com.gma.tsunjo.school.presentation.routes.userRoutes
 import com.typesafe.config.ConfigFactory
@@ -130,6 +131,7 @@ fun Application.configureRouting() {
     authRoutes()
     userRoutes()
     studentRoutes()
+    studentProgressRoutes()
     memberTypeRoutes()
     levelRoutes()
     moveCategoryRoutes()

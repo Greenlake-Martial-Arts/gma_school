@@ -63,7 +63,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `POST auth register creates user successfully`() = withTestApp {
-        val request = CreateUserRequest("create@example.com", "password123")
+        val request = CreateUserRequest("create@example.com", "cGFzc3dvcmQxMjM=")
         val response = client.post("/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), request))
@@ -74,7 +74,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `POST auth register with duplicate email returns 409`() = withTestApp {
-        val request = CreateUserRequest("duplicate@example.com", "password123")
+        val request = CreateUserRequest("duplicate@example.com", "cGFzc3dvcmQxMjM=")
 
         // Create first user
         client.post("/auth/register") {
@@ -106,7 +106,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
         val token = getAuthToken()
 
         // First create a user (will have ID 2, since test user is ID 1)
-        val createRequest = CreateUserRequest("update@example.com", "password123")
+        val createRequest = CreateUserRequest("update@example.com", "cGFzc3dvcmQxMjM=")
         val createResponse = client.post("/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), createRequest))
@@ -158,7 +158,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
         val token = getAuthToken()
 
         // First create a user
-        val createRequest = CreateUserRequest("deactivate@example.com", "password123")
+        val createRequest = CreateUserRequest("deactivate@example.com", "cGFzc3dvcmQxMjM=")
         val createResponse = client.post("/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(CreateUserRequest.serializer(), createRequest))

@@ -31,6 +31,7 @@ fun Application.levelRoutes() {
             route("/levels") {
                 getLevels(logger)
                 getLevelById(logger)
+                getStudentsInLevel(logger)
                 createLevel(logger)
                 updateLevel(logger)
                 deleteLevel(logger)
@@ -67,6 +68,23 @@ fun Route.getLevelById(logger: Logger) {
         } else {
             call.respond(HttpStatusCode.NotFound, "Level not found")
         }
+    }
+}
+
+fun Route.getStudentsInLevel(logger: Logger) {
+    val studentRepository by inject<com.gma.tsunjo.school.domain.repositories.StudentRepository>()
+
+    get("/{id}/students") {
+        val id = call.parameters["id"]?.toLongOrNull()
+        logger.debug("GET /levels/$id/students")
+
+        if (id == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+            return@get
+        }
+
+        val students = studentRepository.getStudentsByLevel(id)
+        call.respond(students)
     }
 }
 

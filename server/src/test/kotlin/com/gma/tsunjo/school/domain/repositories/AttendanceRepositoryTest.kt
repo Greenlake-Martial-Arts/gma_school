@@ -17,7 +17,8 @@ import kotlin.test.assertTrue
 class AttendanceRepositoryTest {
 
     private val attendanceDao = mockk<AttendanceDao>()
-    private val attendanceRepository = AttendanceRepository(attendanceDao)
+    private val studentDao = mockk<com.gma.school.database.data.dao.StudentDao>()
+    private val attendanceRepository = AttendanceRepository(attendanceDao, studentDao)
 
     private val testAttendance = Attendance(
         id = 1L,

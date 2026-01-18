@@ -32,14 +32,14 @@ INSERT INTO levels (code, display_name, order_seq, description) VALUES
 -- Move Categories
 INSERT INTO move_categories (name, description) VALUES
 ('General', 'Default category for moves'),
-('Stances & Footwork', 'Basic stances, footwork, and movement patterns'),
-('Strikes', 'Hand strikes, punches, palm strikes, elbow strikes'),
-('Kicks', 'All kicking techniques and variations'),
-('Blocks & Deflections', 'Defensive hand techniques and blocks'),
-('Grappling & Escapes', 'Grappling, chokes, escapes, and ground techniques'),
 ('Weapons', 'Weapon techniques and disarms'),
-('Training Drills', 'Focus mitt drills, pad work, and training exercises'),
-('Forms & Patterns', 'Traditional forms, Chi Sao, and pattern work'),
+('Kicks', 'All kicking techniques and variations'),
+('Strikes', 'Hand strikes, punches, palm strikes, elbow strikes'),
+('Blocks & Deflections', 'Defensive hand techniques and blocks'),
+('Sticking and trapping', 'Chi Sao, and pattern work'),
+('Standing Grappling', 'Grappling, chokes, escapes, and ground techniques'),
+('Adaptive week', 'Footwork and closings'),
+('Mook jong and Training', 'Traditional forms'),
 ('Testing', 'Tests, evaluations, and equipment requirements');
 
 -- ============================================================================
@@ -594,54 +594,55 @@ INSERT INTO level_requirements (level_id, move_id, sort_order, level_specific_no
 
 -- Users (email as username) - 48 users
 INSERT INTO users (username, password_hash) VALUES
-('aiden@grimmhistory.com', '$2a$10$defaulthash'),
-('ben.r.alvord@gmail.com', '$2a$10$defaulthash'),
-('breckm@hotmail.com', '$2a$10$defaulthash'),
-('brianbiladeau@gmail.com', '$2a$10$defaulthash'),
-('bridorf@gmail.com', '$2a$10$defaulthash'),
-('leukothea@gmail.com', '$2a$10$defaulthash'),
-('ctcarsley@hotmail.com', '$2a$10$defaulthash'),
-('daniel.willyard@hotmail.com', '$2a$10$defaulthash'),
-('david_mxfld@yahoo.com', '$2a$10$defaulthash'),
-('deb@zaret.com', '$2a$10$defaulthash'),
-('emweisser@gmail.com', '$2a$10$defaulthash'),
-('emmajnielsen6@comcast.net', '$2a$10$defaulthash'),
-('erandall26@gmail.com', '$2a$10$defaulthash'),
-('yuane45632@yahoo.com', '$2a$10$defaulthash'),
-('erinlbrowning@gmail.com', '$2a$10$defaulthash'),
-('fabien.lescot@gmail.com', '$2a$10$defaulthash'),
-('gsabben@gmail.com', '$2a$10$defaulthash'),
-('gnila@live.com', '$2a$10$defaulthash'),
-('torrhes@gmail.com', '$2a$10$defaulthash'),
-('jacob.greenleaf@gmail.com', '$2a$10$defaulthash'),
-('jimparfitt53@gmail.com', '$2a$10$defaulthash'),
-('jasonrgarfield@gmail.com', '$2a$10$defaulthash'),
-('jay@knot-eye.com', '$2a$10$defaulthash'),
-('jef7psp@gmail.com', '$2a$10$defaulthash'),
-('jessmcole@hotmail.com', '$2a$10$defaulthash'),
-('johncarney1073@gmail.com', '$2a$10$defaulthash'),
-('j.gardiner@hotmail.com', '$2a$10$defaulthash'),
-('jhughes2011@gmail.com', '$2a$10$defaulthash'),
-('j@jdiaz.io', '$2a$10$defaulthash'),
-('mskarenlawson@gmail.com', '$2a$10$defaulthash'),
-('Gwywnnydd@gmail.com', '$2a$10$defaulthash'),
-('lafcadiod@yahoo.com', '$2a$10$defaulthash'),
-('Lemliah@protonmail.com', '$2a$10$defaulthash'),
-('lee.mackenzieh@gmail.com', '$2a$10$defaulthash'),
-('marie_guirriec@hotmail.com', '$2a$10$defaulthash'),
-('Matt@greenlakemartialarts.com', '$2a$10$defaulthash'),
-('maylynn.wilkins@gmail.com', '$2a$10$defaulthash'),
-('beardesign13@gmail.com', '$2a$10$defaulthash'),
-('mona.wilding@gmail.com', '$2a$10$defaulthash'),
-('nickleanok@yahoo.com', '$2a$10$defaulthash'),
-('kristofer_everett@yahoo.com', '$2a$10$defaulthash'),
-('raqber13@gmail.com', '$2a$10$defaulthash'),
-('sberk10@gmail.com', '$2a$10$defaulthash'),
-('sprather013@gmail.com', '$2a$10$defaulthash'),
-('stacee9118@gmail.com', '$2a$10$defaulthash'),
-('teresarchen@gmail.com', '$2a$10$defaulthash'),
-('y.ten.brug@gmail.com', '$2a$10$defaulthash'),
-('madelinecaron1@gmail.com', '$2a$10$defaulthash')
+('test', 'cGFzc3dvcmQxMjM='), -- password123
+('aiden@grimmhistory.com', 'cGFzc3dvcmQxMjM='),
+('ben.r.alvord@gmail.com', 'cGFzc3dvcmQxMjM='),
+('breckm@hotmail.com', 'cGFzc3dvcmQxMjM='),
+('brianbiladeau@gmail.com', 'cGFzc3dvcmQxMjM='),
+('bridorf@gmail.com', 'cGFzc3dvcmQxMjM='),
+('leukothea@gmail.com', 'cGFzc3dvcmQxMjM='),
+('ctcarsley@hotmail.com', 'cGFzc3dvcmQxMjM='),
+('daniel.willyard@hotmail.com', 'cGFzc3dvcmQxMjM='),
+('david_mxfld@yahoo.com', 'cGFzc3dvcmQxMjM='),
+('deb@zaret.com', 'cGFzc3dvcmQxMjM='),
+('emweisser@gmail.com', 'cGFzc3dvcmQxMjM='),
+('emmajnielsen6@comcast.net', 'cGFzc3dvcmQxMjM='),
+('erandall26@gmail.com', 'cGFzc3dvcmQxMjM='),
+('yuane45632@yahoo.com', 'cGFzc3dvcmQxMjM='),
+('erinlbrowning@gmail.com', 'cGFzc3dvcmQxMjM='),
+('fabien.lescot@gmail.com', 'cGFzc3dvcmQxMjM='),
+('gsabben@gmail.com', 'cGFzc3dvcmQxMjM='),
+('gnila@live.com', 'cGFzc3dvcmQxMjM='),
+('torrhes@gmail.com', 'cGFzc3dvcmQxMjM='),
+('jacob.greenleaf@gmail.com', 'cGFzc3dvcmQxMjM='),
+('jimparfitt53@gmail.com', 'cGFzc3dvcmQxMjM='),
+('jasonrgarfield@gmail.com', 'cGFzc3dvcmQxMjM='),
+('jay@knot-eye.com', 'cGFzc3dvcmQxMjM='),
+('jef7psp@gmail.com', 'cGFzc3dvcmQxMjM='),
+('jessmcole@hotmail.com', 'cGFzc3dvcmQxMjM='),
+('johncarney1073@gmail.com', 'cGFzc3dvcmQxMjM='),
+('j.gardiner@hotmail.com', 'cGFzc3dvcmQxMjM='),
+('jhughes2011@gmail.com', 'cGFzc3dvcmQxMjM='),
+('j@jdiaz.io', 'cGFzc3dvcmQxMjM='),
+('mskarenlawson@gmail.com', 'cGFzc3dvcmQxMjM='),
+('Gwywnnydd@gmail.com', 'cGFzc3dvcmQxMjM='),
+('lafcadiod@yahoo.com', 'cGFzc3dvcmQxMjM='),
+('Lemliah@protonmail.com', 'cGFzc3dvcmQxMjM='),
+('lee.mackenzieh@gmail.com', 'cGFzc3dvcmQxMjM='),
+('marie_guirriec@hotmail.com', 'cGFzc3dvcmQxMjM='),
+('Matt@greenlakemartialarts.com', 'cGFzc3dvcmQxMjM='),
+('maylynn.wilkins@gmail.com', 'cGFzc3dvcmQxMjM='),
+('beardesign13@gmail.com', 'cGFzc3dvcmQxMjM='),
+('mona.wilding@gmail.com', 'cGFzc3dvcmQxMjM='),
+('nickleanok@yahoo.com', 'cGFzc3dvcmQxMjM='),
+('kristofer_everett@yahoo.com', 'cGFzc3dvcmQxMjM='),
+('raqber13@gmail.com', 'cGFzc3dvcmQxMjM='),
+('sberk10@gmail.com', 'cGFzc3dvcmQxMjM='),
+('sprather013@gmail.com', 'cGFzc3dvcmQxMjM='),
+('stacee9118@gmail.com', 'cGFzc3dvcmQxMjM='),
+('teresarchen@gmail.com', 'cGFzc3dvcmQxMjM='),
+('y.ten.brug@gmail.com', 'cGFzc3dvcmQxMjM='),
+('madelinecaron1@gmail.com', 'cGFzc3dvcmQxMjM=');
 
 -- Students - 48 students
 INSERT INTO students (user_id, first_name, last_name, email, phone, address, member_type_id, signup_date, is_active) VALUES
@@ -692,7 +693,7 @@ INSERT INTO students (user_id, first_name, last_name, email, phone, address, mem
 ((SELECT id FROM users WHERE username = 'stacee9118@gmail.com'), 'Stacee', 'Dang', 'stacee9118@gmail.com', '360-824-0580', NULL, (SELECT id FROM member_types WHERE name = 'Regular'), '2025-06-07', true),
 ((SELECT id FROM users WHERE username = 'teresarchen@gmail.com'), 'Teresa', 'Martirosov', 'teresarchen@gmail.com', '626-818-6607', NULL, (SELECT id FROM member_types WHERE name = 'Regular'), '2025-11-06', true),
 ((SELECT id FROM users WHERE username = 'y.ten.brug@gmail.com'), 'Yme', 'ten-Brug', 'y.ten.brug@gmail.com', '206-608-1764', NULL, (SELECT id FROM member_types WHERE name = 'Regular'), '2024-10-01', true),
-((SELECT id FROM users WHERE username = 'madelinecaron1@gmail.com'), 'Madeline', 'Caron', 'madelinecaron1@gmail.com', '206-265-3273', NULL, (SELECT id FROM member_types WHERE name = 'Regular'), '2025-09-26', true)
+((SELECT id FROM users WHERE username = 'madelinecaron1@gmail.com'), 'Madeline', 'Caron', 'madelinecaron1@gmail.com', '206-265-3273', NULL, (SELECT id FROM member_types WHERE name = 'Regular'), '2025-09-26', true);
 
 -- Student Level Assignments
 INSERT INTO student_levels (student_id, level_id) VALUES
@@ -743,7 +744,7 @@ INSERT INTO student_levels (student_id, level_id) VALUES
 ((SELECT id FROM students WHERE email = 'marie_guirriec@hotmail.com'), (SELECT id FROM levels WHERE code = 'BASIC')),
 ((SELECT id FROM students WHERE email = 'sprather013@gmail.com'), (SELECT id FROM levels WHERE code = 'BASIC')),
 ((SELECT id FROM students WHERE email = 'teresarchen@gmail.com'), (SELECT id FROM levels WHERE code = 'BASIC')),
-((SELECT id FROM students WHERE email = 'madelinecaron1@gmail.com'), (SELECT id FROM levels WHERE code = 'BASIC'))
+((SELECT id FROM students WHERE email = 'madelinecaron1@gmail.com'), (SELECT id FROM levels WHERE code = 'BASIC')),
 
 -- BLACK Level (1 student - Instructor)
 ((SELECT id FROM students WHERE email = 'Matt@greenlakemartialarts.com'), (SELECT id FROM levels WHERE code = 'BLACK')),
@@ -757,3 +758,23 @@ INSERT INTO student_levels (student_id, level_id) VALUES
 ((SELECT id FROM students WHERE email = 'Lemliah@protonmail.com'), (SELECT id FROM levels WHERE code = 'TEEN')),
 ((SELECT id FROM students WHERE email = 'maylynn.wilkins@gmail.com'), (SELECT id FROM levels WHERE code = 'TEEN')),
 ((SELECT id FROM students WHERE email = 'nickleanok@yahoo.com'), (SELECT id FROM levels WHERE code = 'TEEN'));
+
+-- ============================================================================
+-- USER ROLES ASSIGNMENTS
+-- ============================================================================
+
+-- All users get STUDENT role by default
+INSERT INTO user_roles (user_id, role_id)
+SELECT id, (SELECT id FROM roles WHERE name = 'STUDENT')
+FROM users;
+
+-- Matt (Director + Instructor)
+INSERT INTO user_roles (user_id, role_id) VALUES
+((SELECT id FROM users WHERE username = 'Matt@greenlakemartialarts.com'), (SELECT id FROM roles WHERE name = 'DIRECTOR')),
+((SELECT id FROM users WHERE username = 'Matt@greenlakemartialarts.com'), (SELECT id FROM roles WHERE name = 'INSTRUCTOR'));
+
+-- Instructors (also keep STUDENT role)
+INSERT INTO user_roles (user_id, role_id) VALUES
+((SELECT id FROM users WHERE username = 'jacob.greenleaf@gmail.com'), (SELECT id FROM roles WHERE name = 'INSTRUCTOR')),
+((SELECT id FROM users WHERE username = 'ctcarsley@hotmail.com'), (SELECT id FROM roles WHERE name = 'INSTRUCTOR')),
+((SELECT id FROM users WHERE username = 'gsabben@gmail.com'), (SELECT id FROM roles WHERE name = 'INSTRUCTOR'));
