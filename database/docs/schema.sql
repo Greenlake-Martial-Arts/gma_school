@@ -147,6 +147,7 @@ CREATE TABLE student_progress (
     id                   BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Student progress (completion of each requirement)',
     student_id           BIGINT NOT NULL,
     level_requirement_id BIGINT NOT NULL,
+    status               VARCHAR(20) NOT NULL DEFAULT 'NOT_STARTED' COMMENT 'Progress status: NOT_STARTED, IN_PROGRESS, PASSED',
     completed_at         DATETIME DEFAULT NULL,
     instructor_id        BIGINT DEFAULT NULL,
     attempts             INT DEFAULT '0',
@@ -159,7 +160,8 @@ CREATE TABLE student_progress (
     KEY idx_progress_req (level_requirement_id),
     CONSTRAINT fk_sp_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     CONSTRAINT fk_sp_requirement FOREIGN KEY (level_requirement_id) REFERENCES level_requirements(id) ON DELETE CASCADE,
-    CONSTRAINT fk_sp_instructor FOREIGN KEY (instructor_id) REFERENCES students(id) ON DELETE SET NULL
+    CONSTRAINT fk_sp_instructor FOREIGN KEY (instructor_id) REFERENCES students(id) ON DELETE SET NULL,
+    CONSTRAINT check_status CHECK (status IN ('NOT_STARTED', 'IN_PROGRESS', 'PASSED'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==============================================================

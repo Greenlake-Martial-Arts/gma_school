@@ -2,22 +2,59 @@
 
 package com.gma.tsunjo.school.domain.repositories
 
+import com.gma.school.database.data.dao.LevelDao
 import com.gma.school.database.data.dao.MemberTypeDao
 import com.gma.school.database.data.dao.StudentDao
+import com.gma.school.database.data.dao.StudentLevelDao
+import com.gma.tsunjo.school.api.responses.StudentWithLevel
 import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.models.Student
 import kotlinx.datetime.LocalDate
 
 class StudentRepository(
     private val studentDao: StudentDao,
-    private val memberTypeDao: MemberTypeDao
+    private val memberTypeDao: MemberTypeDao,
+    private val studentLevelDao: StudentLevelDao,
+    private val levelDao: LevelDao
 ) {
 
-    fun getAllStudents(): List<Student> = studentDao.findAll()
+    fun getAllStudents(): List<StudentWithLevel> {
+        val students = studentDao.findAll()
+        return students.map { student ->
+            val studentLevel = studentLevelDao.findByStudent(student.id)
+            val level = studentLevel?.let { levelDao.findById(it.levelId) }
+            StudentWithLevel(student, level)
+        }
+    }
 
-    fun getActiveStudents(): List<Student> = studentDao.findAllActive()
+    fun getActiveStudents(): List<StudentWithLevel> {
+        val students = studentDao.findAllActive()
+        return students.map { student ->
+            val studentLevel = studentLevelDao.findByStudent(student.id)
+            val level = studentLevel?.let { levelDao.findById(it.levelId) }
+            StudentWithLevel(student, level)
+        }
+    }
 
-    fun getStudentById(id: Long): Student? = studentDao.findById(id)
+    fun getStudentById(id: Long): StudentWithLevel? {
+        val student = studentDao.findById(id) ?: return null
+        val studentLevel = studentLevelDao.findByStudent(id)
+        val level = studentLevel?.let { levelDao.findById(it.levelId) }
+        return StudentWithLevel(student, level)
+    }
+
+    fun getStudentByIdWithLevel(id: Long): StudentWithLevel? = getStudentById(id)
+
+    fun getStudentsByLevel(levelId: Long): List<StudentWithLevel> {
+        val studentLevels = studentLevelDao.findByLevel(levelId)
+        return studentLevels.mapNotNull { studentLevel ->
+            val student = studentDao.findById(studentLevel.studentId)
+            student?.let {
+                val level = levelDao.findById(studentLevel.levelId)
+                StudentWithLevel(it, level)
+            }
+        }
+    }
 
     fun getStudentByEmail(email: String): Student? = studentDao.findByEmail(email)
 
@@ -30,7 +67,8 @@ class StudentRepository(
         phone: String?,
         address: String?,
         memberTypeId: Long,
-        signupDate: LocalDate?
+        signupDate: LocalDate?,
+        initialLevelCode: String? = null
     ): Result<Student> {
         return try {
             // Validate member type exists
@@ -63,6 +101,14 @@ class StudentRepository(
                 signupDate
             )
                 ?: return Result.failure(AppException.DatabaseError("Failed to create student"))
+
+            // Assign initial level
+            val levelCode = initialLevelCode ?: "BASIC"
+            val level = levelDao.findByCode(levelCode)
+            if (level != null) {
+                studentLevelDao.assign(student.id, level.id)
+            }
+            // If level not found, student is created without level assignment (can be assigned later)
 
             Result.success(student)
         } catch (e: AppException) {

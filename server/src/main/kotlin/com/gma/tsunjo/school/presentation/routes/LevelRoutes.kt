@@ -9,6 +9,7 @@ import com.gma.tsunjo.school.presentation.extensions.respondWithError
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -26,12 +27,15 @@ fun Application.levelRoutes() {
     val logger = LoggerFactory.getLogger(javaClass)
     routing {
         logger.debug("<<<< levelRoutes")
-        route("/levels") {
-            getLevels(logger)
-            getLevelById(logger)
-            createLevel(logger)
-            updateLevel(logger)
-            deleteLevel(logger)
+        authenticate("auth-jwt") {
+            route("/levels") {
+                getLevels(logger)
+                getLevelById(logger)
+                getStudentsInLevel(logger)
+                createLevel(logger)
+                updateLevel(logger)
+                deleteLevel(logger)
+            }
         }
     }
 }
@@ -64,6 +68,23 @@ fun Route.getLevelById(logger: Logger) {
         } else {
             call.respond(HttpStatusCode.NotFound, "Level not found")
         }
+    }
+}
+
+fun Route.getStudentsInLevel(logger: Logger) {
+    val studentRepository by inject<com.gma.tsunjo.school.domain.repositories.StudentRepository>()
+
+    get("/{id}/students") {
+        val id = call.parameters["id"]?.toLongOrNull()
+        logger.debug("GET /levels/$id/students")
+
+        if (id == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+            return@get
+        }
+
+        val students = studentRepository.getStudentsByLevel(id)
+        call.respond(students)
     }
 }
 

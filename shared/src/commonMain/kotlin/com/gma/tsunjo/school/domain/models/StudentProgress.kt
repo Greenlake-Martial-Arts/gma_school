@@ -9,6 +9,7 @@ data class StudentProgress(
     val id: Long,
     val studentId: Long,
     val levelRequirementId: Long,
+    val status: ProgressState,
     val completedAt: LocalDateTime?,
     val instructorId: Long?,
     val attempts: Int,

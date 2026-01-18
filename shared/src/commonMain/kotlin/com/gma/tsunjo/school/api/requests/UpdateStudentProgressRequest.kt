@@ -2,10 +2,12 @@
 
 package com.gma.tsunjo.school.api.requests
 
+import com.gma.tsunjo.school.domain.models.ProgressState
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class UpdateStudentProgressRequest(
+    val status: ProgressState? = null,
     val instructorId: Long? = null,
     val attempts: Int? = null,
     val notes: String? = null

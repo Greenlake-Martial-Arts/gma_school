@@ -8,6 +8,7 @@ import com.gma.tsunjo.school.presentation.extensions.respondWithError
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -24,12 +25,14 @@ fun Application.moveRoutes() {
     val logger = LoggerFactory.getLogger(javaClass)
     routing {
         logger.debug("<<<< moveRoutes")
-        route("/moves") {
-            getMoves(logger)
-            getMoveById(logger)
-            getMovesByCategory(logger)
-            createMove(logger)
-            deleteMove(logger)
+        authenticate("auth-jwt") {
+            route("/moves") {
+                getMoves(logger)
+                getMoveById(logger)
+                getMovesByCategory(logger)
+                createMove(logger)
+                deleteMove(logger)
+            }
         }
     }
 }

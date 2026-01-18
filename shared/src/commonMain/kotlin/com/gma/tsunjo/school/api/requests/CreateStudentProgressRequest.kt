@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 data class CreateStudentProgressRequest(
     val studentId: Long,
     val levelRequirementId: Long,
-    val instructorId: Long?,
-    val attempts: Int,
-    val notes: String?
+    val instructorId: Long? = null,
+    val attempts: Int = 0,
+    val notes: String? = null
 )

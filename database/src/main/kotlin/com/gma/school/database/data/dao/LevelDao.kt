@@ -36,6 +36,12 @@ class LevelDao {
             ?.let(::toLevel)
     }
 
+    fun findByCode(code: String): Level? = transaction {
+        LevelsTable.select { LevelsTable.code eq code }
+            .singleOrNull()
+            ?.let(::toLevel)
+    }
+
     fun findAll(): List<Level> = transaction {
         LevelsTable.selectAll().map(::toLevel)
     }
