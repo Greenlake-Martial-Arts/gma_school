@@ -2,6 +2,7 @@
 package com.gma.school.database.data.dao
 
 import com.gma.school.database.data.tables.StudentProgressTable
+import com.gma.tsunjo.school.domain.models.ProgressState
 import com.gma.tsunjo.school.domain.models.StudentProgress
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -11,6 +12,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
@@ -26,6 +28,8 @@ class StudentProgressDao {
         val id = StudentProgressTable.insertAndGetId {
             it[StudentProgressTable.studentId] = studentId
             it[StudentProgressTable.levelRequirementId] = levelRequirementId
+            it[StudentProgressTable.status] = ProgressState.NOT_STARTED.name
+            it[StudentProgressTable.completedAt] = null
             it[StudentProgressTable.instructorId] = instructorId
             it[StudentProgressTable.attempts] = attempts
             it[StudentProgressTable.notes] = notes
@@ -33,7 +37,7 @@ class StudentProgressDao {
             it[StudentProgressTable.updatedAt] = now
         }.value
 
-        StudentProgress(id, studentId, levelRequirementId, null, instructorId, attempts, notes, now, now)
+        StudentProgress(id, studentId, levelRequirementId, ProgressState.NOT_STARTED, null, instructorId, attempts, notes, now, now)
     }
 
     fun findById(id: Long): StudentProgress? = transaction {
@@ -42,15 +46,36 @@ class StudentProgressDao {
             ?.let(::toStudentProgress)
     }
 
+    fun findAll(): List<StudentProgress> = transaction {
+        StudentProgressTable.selectAll()
+            .map(::toStudentProgress)
+    }
+
     fun findByStudent(studentId: Long): List<StudentProgress> = transaction {
         StudentProgressTable.select { StudentProgressTable.studentId eq studentId }
             .map(::toStudentProgress)
     }
 
     fun markCompleted(id: Long, instructorId: Long): Boolean = transaction {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         StudentProgressTable.update({ StudentProgressTable.id eq id }) {
-            it[StudentProgressTable.completedAt] = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+            it[StudentProgressTable.status] = ProgressState.PASSED.name
+            it[StudentProgressTable.completedAt] = now
             it[StudentProgressTable.instructorId] = instructorId
+            it[StudentProgressTable.updatedAt] = now
+        } > 0
+    }
+
+    fun updateStatus(id: Long, status: ProgressState, instructorId: Long?, notes: String?): Boolean = transaction {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+        StudentProgressTable.update({ StudentProgressTable.id eq id }) {
+            it[StudentProgressTable.status] = status.name
+            if (status == ProgressState.PASSED) {
+                it[StudentProgressTable.completedAt] = now
+                it[StudentProgressTable.instructorId] = instructorId
+            }
+            it[StudentProgressTable.notes] = notes
+            it[StudentProgressTable.updatedAt] = now
         } > 0
     }
 
@@ -69,6 +94,7 @@ class StudentProgressDao {
         id = row[StudentProgressTable.id].value,
         studentId = row[StudentProgressTable.studentId],
         levelRequirementId = row[StudentProgressTable.levelRequirementId],
+        status = ProgressState.valueOf(row[StudentProgressTable.status]),
         completedAt = row[StudentProgressTable.completedAt],
         instructorId = row[StudentProgressTable.instructorId],
         attempts = row[StudentProgressTable.attempts],
