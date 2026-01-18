@@ -6,7 +6,8 @@ import com.gma.tsunjo.school.domain.models.ProgressState
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UpdateStudentProgressRequest(
+data class BulkUpdateProgressRequest(
+    val progressIds: List<Long>,
     val status: ProgressState? = null,
     val instructorId: Long? = null,
     val attempts: Int? = null,
