@@ -26,7 +26,6 @@ dependencies {
     implementation(libs.ktor.serverNetty)
     implementation(libs.ktor.serverContentNegotiation)
     implementation(libs.ktor.serverCompression)
-    implementation(libs.ktor.serverStatusPages)
     implementation(libs.ktor.serializationKotlinxJson)
     implementation(libs.ktor.serverHostJvm)
     implementation(libs.ktor.serverAuth)
