@@ -48,7 +48,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid user ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid user ID"))
     }
 
     @Test
@@ -58,7 +58,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().contains("User not found"))
+        assertTrue(response.bodyAsText().containsError("User not found"))
     }
 
     @Test
@@ -69,7 +69,8 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             setBody(Json.encodeToString(CreateUserRequest.serializer(), request))
         }
         assertEquals(HttpStatusCode.Created, response.status)
-        assertTrue(response.bodyAsText().contains("create@example.com"))
+        val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        assertTrue(json["error"]?.jsonPrimitive?.content?.contains("create@example.com") == true)
     }
 
     @Test
@@ -89,7 +90,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             setBody(Json.encodeToString(CreateUserRequest.serializer(), duplicateRequest))
         }
         assertEquals(HttpStatusCode.Conflict, response.status)
-        assertTrue(response.bodyAsText().contains("already exists"))
+        assertTrue(response.bodyAsText().containsError("already exists"))
     }
 
     @Test
@@ -124,7 +125,8 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             setBody(Json.encodeToString(UpdateUserRequest.serializer(), updateRequest))
         }
         assertEquals(HttpStatusCode.OK, response.status)
-        assertTrue(response.bodyAsText().contains("updated@example.com"))
+        val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        assertTrue(json["error"]?.jsonPrimitive?.content?.contains("updated@example.com") == true)
     }
 
     @Test
@@ -137,7 +139,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             setBody(Json.encodeToString(UpdateUserRequest.serializer(), request))
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid user ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid user ID"))
     }
 
     @Test
@@ -150,7 +152,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             setBody(Json.encodeToString(UpdateUserRequest.serializer(), request))
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().contains("User not found"))
+        assertTrue(response.bodyAsText().containsError("User not found"))
     }
 
     @Test
@@ -173,7 +175,8 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.OK, response.status)
-        assertTrue(response.bodyAsText().contains("User deactivated"))
+        val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        assertTrue(json["error"]?.jsonPrimitive?.content?.contains("User deactivated") == true)
     }
 
     @Test
@@ -183,7 +186,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid user ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid user ID"))
     }
 
     @Test
@@ -193,6 +196,6 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().contains("User not found"))
+        assertTrue(response.bodyAsText().containsError("User not found"))
     }
 }

@@ -65,7 +65,7 @@ class StudentProgressRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test

@@ -28,7 +28,7 @@ class MemberTypeRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test
@@ -38,6 +38,6 @@ class MemberTypeRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().contains("Member type not found"))
+        assertTrue(response.bodyAsText().containsError("Member type not found"))
     }
 }

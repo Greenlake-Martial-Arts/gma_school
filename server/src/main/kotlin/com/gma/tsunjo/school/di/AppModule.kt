@@ -14,6 +14,7 @@ import com.gma.school.database.data.dao.StudentProgressDao
 import com.gma.school.database.data.dao.UserDao
 import com.gma.tsunjo.school.config.JwtConfig
 import com.gma.tsunjo.school.config.JwtTokenGenerator
+import com.gma.tsunjo.school.di.commonModule
 import com.gma.tsunjo.school.domain.repositories.AttendanceRepository
 import com.gma.tsunjo.school.domain.repositories.LevelRepository
 import com.gma.tsunjo.school.domain.repositories.MemberTypeRepository
