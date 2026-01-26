@@ -3,6 +3,7 @@
 package com.gma.tsunjo.school.presentation.routes
 
 import com.gma.tsunjo.school.domain.exceptions.AppException
+import com.gma.tsunjo.school.presentation.extensions.handleException
 
 import com.gma.tsunjo.school.api.requests.CreateStudentProgressRequest
 import com.gma.tsunjo.school.api.requests.UpdateStudentProgressRequest
@@ -21,185 +22,203 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import org.koin.ktor.ext.get
 import org.koin.ktor.ext.inject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 fun Application.studentProgressRoutes() {
     val logger = LoggerFactory.getLogger(javaClass)
+    val studentProgressRepository = get<StudentProgressRepository>()
     routing {
         logger.debug("<<<< studentProgressRoutes")
         authenticate("auth-jwt") {
             route("/student-progress") {
-                getStudentProgress(logger)
-                getStudentProgressById(logger)
-                getProgressByStudent(logger)
-                getProgressByStudentAndLevel(logger)
-                createStudentProgress(logger)
-                updateStudentProgress(logger)
-                bulkUpdateStudentProgress(logger)
-                deleteStudentProgress(logger)
+                getStudentProgress(logger, studentProgressRepository)
+                getStudentProgressById(logger, studentProgressRepository)
+                getProgressByStudent(logger, studentProgressRepository)
+                getProgressByStudentAndLevel(logger, studentProgressRepository)
+                createStudentProgress(logger, studentProgressRepository)
+                updateStudentProgress(logger, studentProgressRepository)
+                bulkUpdateStudentProgress(logger, studentProgressRepository)
+                deleteStudentProgress(logger, studentProgressRepository)
             }
         }
     }
 }
 
-fun Route.getStudentProgress(logger: Logger) {
-    val repository by inject<StudentProgressRepository>()
-
+fun Route.getStudentProgress(logger: Logger, studentProgressRepository: StudentProgressRepository) {
     get {
-        logger.debug("GET /student-progress")
-        val progress = repository.getAllProgress()
-        call.respond(progress)
+        try {
+            logger.debug("GET /student-progress")
+            val progress = studentProgressRepository.getAllProgress()
+            call.respond(progress)
+        } catch (e: Exception) {
+            call.handleException(e, logger)
+        }
     }
 }
 
-fun Route.getStudentProgressById(logger: Logger) {
-    val repository by inject<StudentProgressRepository>()
-
+fun Route.getStudentProgressById(logger: Logger, studentProgressRepository: StudentProgressRepository) {
     get("/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-        logger.debug("GET /student-progress/$id")
+        try {
+            val id = call.parameters["id"]?.toLongOrNull()
+            logger.debug("GET /student-progress/$id")
 
-        if (id == null) {
-            throw AppException.BadRequest("Invalid ID")
-            
-        }
+            if (id == null) {
+                throw AppException.BadRequest("Invalid ID")
+                
+            }
 
-        val progress = repository.getProgressById(id)
-        if (progress != null) {
-            call.respond(progress)
-        } else {
-            throw AppException.ValidationError("Progress not found")
+            val progress = studentProgressRepository.getProgressById(id)
+            if (progress != null) {
+                call.respond(progress)
+            } else {
+                throw AppException.StudentProgressNotFound(id)
+            }
+        } catch (e: Exception) {
+            call.handleException(e, logger)
         }
     }
 }
 
-fun Route.getProgressByStudent(logger: Logger) {
-    val repository by inject<StudentProgressRepository>()
-
+fun Route.getProgressByStudent(logger: Logger, studentProgressRepository: StudentProgressRepository) {
     get("/student/{studentId}") {
-        val studentId = call.parameters["studentId"]?.toLongOrNull()
-        logger.debug("GET /student-progress/student/$studentId")
+        try {
+            val studentId = call.parameters["studentId"]?.toLongOrNull()
+            logger.debug("GET /student-progress/student/$studentId")
 
-        if (studentId == null) {
-            throw AppException.BadRequest("Invalid student ID")
-            
-        }
+            if (studentId == null) {
+                throw AppException.BadRequest("Invalid student ID")
+                
+            }
 
-        val progress = repository.getProgressByStudent(studentId)
-        call.respond(progress)
-    }
-}
-
-fun Route.getProgressByStudentAndLevel(logger: Logger) {
-    val repository by inject<StudentProgressRepository>()
-
-    get("/student/{studentId}/level/{levelId}") {
-        val studentId = call.parameters["studentId"]?.toLongOrNull()
-        val levelId = call.parameters["levelId"]?.toLongOrNull()
-        logger.debug("GET /student-progress/student/$studentId/level/$levelId")
-
-        if (studentId == null || levelId == null) {
-            throw AppException.BadRequest("Invalid student ID or level ID")
-            
-        }
-
-        val progress = repository.getProgressByStudentAndLevel(studentId, levelId)
-        if (progress != null) {
+            val progress = studentProgressRepository.getProgressByStudent(studentId)
             call.respond(progress)
-        } else {
-            throw AppException.LevelNotFound(levelId)
+        } catch (e: Exception) {
+            call.handleException(e, logger)
         }
     }
 }
 
-fun Route.createStudentProgress(logger: Logger) {
-    val repository by inject<StudentProgressRepository>()
+fun Route.getProgressByStudentAndLevel(logger: Logger, studentProgressRepository: StudentProgressRepository) {
+    get("/student/{studentId}/level/{levelId}") {
+        try {
+            val studentId = call.parameters["studentId"]?.toLongOrNull()
+            val levelId = call.parameters["levelId"]?.toLongOrNull()
+            logger.debug("GET /student-progress/student/$studentId/level/$levelId")
 
+            if (studentId == null || levelId == null) {
+                throw AppException.BadRequest("Invalid student ID or level ID")
+                
+            }
+
+            val progress = studentProgressRepository.getProgressByStudentAndLevel(studentId, levelId)
+            if (progress != null) {
+                call.respond(progress)
+            } else {
+                throw AppException.LevelNotFound(levelId)
+            }
+        } catch (e: Exception) {
+            call.handleException(e, logger)
+        }
+    }
+}
+
+fun Route.createStudentProgress(logger: Logger, studentProgressRepository: StudentProgressRepository) {
     post {
-        logger.debug("POST /student-progress")
-        val request = call.receive<CreateStudentProgressRequest>()
-        val result = repository.createProgress(
-            studentId = request.studentId,
-            levelRequirementId = request.levelRequirementId,
-            instructorId = request.instructorId,
-            attempts = request.attempts,
-            notes = request.notes
-        )
+        try {
+            logger.debug("POST /student-progress")
+            val request = call.receive<CreateStudentProgressRequest>()
+            val result = studentProgressRepository.createProgress(
+                studentId = request.studentId,
+                levelRequirementId = request.levelRequirementId,
+                instructorId = request.instructorId,
+                attempts = request.attempts,
+                notes = request.notes
+            )
 
-        result.fold(
-            onSuccess = { call.respond(HttpStatusCode.Created, it) },
-            onFailure = { throw it }
-        )
+            result.fold(
+                onSuccess = { call.respond(HttpStatusCode.Created, it) },
+                onFailure = { throw it }
+            )
+        } catch (e: Exception) {
+            call.handleException(e, logger)
+        }
     }
 }
 
-fun Route.updateStudentProgress(logger: Logger) {
-    val repository by inject<StudentProgressRepository>()
-
+fun Route.updateStudentProgress(logger: Logger, studentProgressRepository: StudentProgressRepository) {
     put("/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-        logger.debug("PUT /student-progress/$id")
+        try {
+            val id = call.parameters["id"]?.toLongOrNull()
+            logger.debug("PUT /student-progress/$id")
 
-        if (id == null) {
-            throw AppException.BadRequest("Invalid ID")
-            
-        }
+            if (id == null) {
+                throw AppException.BadRequest("Invalid ID")
+                
+            }
 
-        val request = call.receive<UpdateStudentProgressRequest>()
-        val updated = repository.updateProgress(
-            id = id,
-            status = request.status,
-            instructorId = request.instructorId,
-            attempts = request.attempts,
-            notes = request.notes
-        )
+            val request = call.receive<UpdateStudentProgressRequest>()
+            val updated = studentProgressRepository.updateProgress(
+                id = id,
+                status = request.status,
+                instructorId = request.instructorId,
+                attempts = request.attempts,
+                notes = request.notes
+            )
 
-        if (updated) {
-            call.respond(HttpStatusCode.OK, "Progress updated")
-        } else {
-            throw AppException.ValidationError("Progress not found")
+            if (updated) {
+                call.respond(HttpStatusCode.OK, "Progress updated")
+            } else {
+                throw AppException.StudentProgressNotFound(id)
+            }
+        } catch (e: Exception) {
+            call.handleException(e, logger)
         }
     }
 }
 
-fun Route.bulkUpdateStudentProgress(logger: Logger) {
-    val repository by inject<StudentProgressRepository>()
-
+fun Route.bulkUpdateStudentProgress(logger: Logger, studentProgressRepository: StudentProgressRepository) {
     put("/bulk") {
-        logger.debug("PUT /student-progress/bulk")
+        try {
+            logger.debug("PUT /student-progress/bulk")
 
-        val request = call.receive<com.gma.tsunjo.school.api.requests.BulkUpdateProgressRequest>()
-        val count = repository.bulkUpdateProgress(
-            progressIds = request.progressIds,
-            status = request.status,
-            instructorId = request.instructorId,
-            attempts = request.attempts,
-            notes = request.notes
-        )
+            val request = call.receive<com.gma.tsunjo.school.api.requests.BulkUpdateProgressRequest>()
+            val count = studentProgressRepository.bulkUpdateProgress(
+                progressIds = request.progressIds,
+                status = request.status,
+                instructorId = request.instructorId,
+                attempts = request.attempts,
+                notes = request.notes
+            )
 
-        call.respond(HttpStatusCode.OK, mapOf("updated" to count, "total" to request.progressIds.size))
+            call.respond(HttpStatusCode.OK, mapOf("updated" to count, "total" to request.progressIds.size))
+        } catch (e: Exception) {
+            call.handleException(e, logger)
+        }
     }
 }
 
-fun Route.deleteStudentProgress(logger: Logger) {
-    val repository by inject<StudentProgressRepository>()
-
+fun Route.deleteStudentProgress(logger: Logger, studentProgressRepository: StudentProgressRepository) {
     delete("/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-        logger.debug("DELETE /student-progress/$id")
+        try {
+            val id = call.parameters["id"]?.toLongOrNull()
+            logger.debug("DELETE /student-progress/$id")
 
-        if (id == null) {
-            throw AppException.BadRequest("Invalid ID")
-            
-        }
+            if (id == null) {
+                throw AppException.BadRequest("Invalid ID")
+                
+            }
 
-        val deleted = repository.deleteProgress(id)
-        if (deleted) {
-            call.respond(HttpStatusCode.OK, "Progress deleted")
-        } else {
-            throw AppException.ValidationError("Progress not found")
+            val deleted = studentProgressRepository.deleteProgress(id)
+            if (deleted) {
+                call.respond(HttpStatusCode.OK, "Progress deleted")
+            } else {
+                throw AppException.StudentProgressNotFound(id)
+            }
+        } catch (e: Exception) {
+            call.handleException(e, logger)
         }
     }
 }

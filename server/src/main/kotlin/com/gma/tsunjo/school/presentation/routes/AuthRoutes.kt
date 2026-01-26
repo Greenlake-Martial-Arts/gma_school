@@ -9,6 +9,7 @@ import com.gma.tsunjo.school.api.responses.UserInfo
 import com.gma.tsunjo.school.config.JwtTokenGenerator
 import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.repositories.UserRepository
+import com.gma.tsunjo.school.presentation.extensions.handleException
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -38,21 +39,25 @@ fun Application.authRoutes() {
 
 fun Route.register(logger: Logger, userRepository: UserRepository) {
     post("/register") {
-        logger.debug("<<<< POST /auth/register")
-        val request = call.receive<CreateUserRequest>()
+        try {
+            logger.debug("<<<< POST /auth/register")
+            val request = call.receive<CreateUserRequest>()
 
-        userRepository.createUser(
-            username = request.username,
-            password = request.password,
-            roleId = request.roleId
-        ).fold(
-            onSuccess = { user ->
-                call.respond(HttpStatusCode.Created, user)
-            },
-            onFailure = { error ->
-                throw error
-            }
-        )
+            userRepository.createUser(
+                username = request.username,
+                password = request.password,
+                roleId = request.roleId
+            ).fold(
+                onSuccess = { user ->
+                    call.respond(HttpStatusCode.Created, user)
+                },
+                onFailure = { error ->
+                    throw error
+                }
+            )
+        } catch (e: Exception) {
+            call.handleException(e, logger)
+        }
     }
 }
 
@@ -62,37 +67,41 @@ fun Route.login(
     jwtTokenGenerator: JwtTokenGenerator
 ) {
     post("/login") {
-        logger.debug("<<<< POST /auth/login")
+        try {
+            logger.debug("<<<< POST /auth/login")
 
-        val credentials = try {
-            call.receive<LoginRequest>()
-        } catch (e: Exception) {
-            logger.error("<<<< Failed to parse login request: ${e.message}")
-            throw AppException.BadRequest("Invalid request format")
-        }
-
-        logger.debug("<<<< username: ${credentials.username}")
-
-        val result = userRepository.authenticateUser(credentials.username, credentials.password)
-
-        result.fold(
-            onSuccess = { user ->
-                logger.debug("<<<< Authentication successful for user: ${user.username}")
-                val token = jwtTokenGenerator.generateAccessToken(credentials)
-                val response = LoginResponse(
-                    token = token,
-                    user = UserInfo(
-                        id = user.id,
-                        username = user.username,
-                        isActive = user.isActive
-                    )
-                )
-                call.respond(HttpStatusCode.OK, response)
-            },
-            onFailure = {
-                logger.error("<<<< Authentication failed: Invalid credentials")
-                throw AppException.InvalidCredentials()
+            val credentials = try {
+                call.receive<LoginRequest>()
+            } catch (e: Exception) {
+                logger.error("<<<< Failed to parse login request: ${e.message}")
+                throw AppException.BadRequest("Invalid request format")
             }
-        )
+
+            logger.debug("<<<< username: ${credentials.username}")
+
+            val result = userRepository.authenticateUser(credentials.username, credentials.password)
+
+            result.fold(
+                onSuccess = { user ->
+                    logger.debug("<<<< Authentication successful for user: ${user.username}")
+                    val token = jwtTokenGenerator.generateAccessToken(credentials)
+                    val response = LoginResponse(
+                        token = token,
+                        user = UserInfo(
+                            id = user.id,
+                            username = user.username,
+                            isActive = user.isActive
+                        )
+                    )
+                    call.respond(HttpStatusCode.OK, response)
+                },
+                onFailure = {
+                    logger.error("<<<< Authentication failed: Invalid credentials")
+                    throw AppException.InvalidCredentials()
+                }
+            )
+        } catch (e: Exception) {
+            call.handleException(e, logger)
+        }
     }
 }

@@ -3,6 +3,7 @@
 package com.gma.tsunjo.school.presentation.routes
 
 import com.gma.tsunjo.school.domain.exceptions.AppException
+import com.gma.tsunjo.school.presentation.extensions.handleException
 
 import com.gma.tsunjo.school.api.requests.CreateMoveRequest
 import com.gma.tsunjo.school.domain.repositories.MoveRepository
@@ -19,107 +20,119 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import org.koin.ktor.ext.get
 import org.koin.ktor.ext.inject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 fun Application.moveRoutes() {
     val logger = LoggerFactory.getLogger(javaClass)
+    val moveRepository = get<MoveRepository>()
     routing {
         logger.debug("<<<< moveRoutes")
         authenticate("auth-jwt") {
             route("/moves") {
-                getMoves(logger)
-                getMoveById(logger)
-                getMovesByCategory(logger)
-                createMove(logger)
-                deleteMove(logger)
+                getMoves(logger, moveRepository)
+                getMoveById(logger, moveRepository)
+                getMovesByCategory(logger, moveRepository)
+                createMove(logger, moveRepository)
+                deleteMove(logger, moveRepository)
             }
         }
     }
 }
 
-fun Route.getMoves(logger: Logger) {
-    val moveRepository by inject<MoveRepository>()
-
+fun Route.getMoves(logger: Logger, moveRepository: MoveRepository) {
     get {
-        logger.debug("GET /moves")
-        val moves = moveRepository.getAllMoves()
-        call.respond(moves)
+        try {
+            logger.debug("GET /moves")
+            val moves = moveRepository.getAllMoves()
+            call.respond(moves)
+        } catch (e: Exception) {
+            call.handleException(e, logger)
+        }
     }
 }
 
-fun Route.getMoveById(logger: Logger) {
-    val moveRepository by inject<MoveRepository>()
-
+fun Route.getMoveById(logger: Logger, moveRepository: MoveRepository) {
     get("/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-        logger.debug("GET /moves/$id")
+        try {
+            val id = call.parameters["id"]?.toLongOrNull()
+            logger.debug("GET /moves/$id")
 
-        if (id == null) {
-            throw AppException.BadRequest("Invalid ID")
-            
-        }
+            if (id == null) {
+                throw AppException.BadRequest("Invalid ID")
+                
+            }
 
-        val move = moveRepository.getMoveById(id)
-        if (move != null) {
-            call.respond(move)
-        } else {
-            throw AppException.MoveNotFound(id)
+            val move = moveRepository.getMoveById(id)
+            if (move != null) {
+                call.respond(move)
+            } else {
+                throw AppException.MoveNotFound(id)
+            }
+        } catch (e: Exception) {
+            call.handleException(e, logger)
         }
     }
 }
 
-fun Route.getMovesByCategory(logger: Logger) {
-    val moveRepository by inject<MoveRepository>()
-
+fun Route.getMovesByCategory(logger: Logger, moveRepository: MoveRepository) {
     get("/category/{categoryId}") {
-        val categoryId = call.parameters["categoryId"]?.toLongOrNull()
-        logger.debug("GET /moves/category/$categoryId")
+        try {
+            val categoryId = call.parameters["categoryId"]?.toLongOrNull()
+            logger.debug("GET /moves/category/$categoryId")
 
-        if (categoryId == null) {
-            throw AppException.BadRequest("Invalid category ID")
-            
+            if (categoryId == null) {
+                throw AppException.BadRequest("Invalid category ID")
+                
+            }
+
+            val moves = moveRepository.getMovesByCategory(categoryId)
+            call.respond(moves)
+        } catch (e: Exception) {
+            call.handleException(e, logger)
         }
-
-        val moves = moveRepository.getMovesByCategory(categoryId)
-        call.respond(moves)
     }
 }
 
-fun Route.createMove(logger: Logger) {
-    val moveRepository by inject<MoveRepository>()
-
+fun Route.createMove(logger: Logger, moveRepository: MoveRepository) {
     post {
-        logger.debug("POST /moves")
-        val request = call.receive<CreateMoveRequest>()
-        val result = moveRepository.createMove(request.name, request.description)
+        try {
+            logger.debug("POST /moves")
+            val request = call.receive<CreateMoveRequest>()
+            val result = moveRepository.createMove(request.name, request.description)
 
-        result.fold(
-            onSuccess = { call.respond(HttpStatusCode.Created, it) },
-            onFailure = { throw it }
-        )
+            result.fold(
+                onSuccess = { call.respond(HttpStatusCode.Created, it) },
+                onFailure = { throw it }
+            )
+        } catch (e: Exception) {
+            call.handleException(e, logger)
+        }
     }
 }
 
-fun Route.deleteMove(logger: Logger) {
-    val moveRepository by inject<MoveRepository>()
-
+fun Route.deleteMove(logger: Logger, moveRepository: MoveRepository) {
     delete("/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-        logger.debug("DELETE /moves/$id")
+        try {
+            val id = call.parameters["id"]?.toLongOrNull()
+            logger.debug("DELETE /moves/$id")
 
-        if (id == null) {
-            throw AppException.BadRequest("Invalid ID")
-            
-        }
+            if (id == null) {
+                throw AppException.BadRequest("Invalid ID")
+                
+            }
 
-        val deleted = moveRepository.deleteMove(id)
+            val deleted = moveRepository.deleteMove(id)
 
-        if (deleted) {
-            call.respond(HttpStatusCode.OK, "Move deleted")
-        } else {
-            throw AppException.MoveNotFound(id)
+            if (deleted) {
+                call.respond(HttpStatusCode.OK, "Move deleted")
+            } else {
+                throw AppException.MoveNotFound(id)
+            }
+        } catch (e: Exception) {
+            call.handleException(e, logger)
         }
     }
 }
