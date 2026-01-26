@@ -7,6 +7,7 @@ package com.gma.tsunjo.school
 import com.gma.school.database.DatabaseFactory
 import com.gma.school.database.config.DatabaseConfig
 import com.gma.tsunjo.school.config.configureJwtAuthentication
+import com.gma.tsunjo.school.config.configureStatusPages
 import com.gma.tsunjo.school.di.appModule
 import com.gma.tsunjo.school.presentation.routes.attendanceRoutes
 import com.gma.tsunjo.school.presentation.routes.authRoutes
@@ -21,13 +22,12 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
-import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
-import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.compression.Compression
 import io.ktor.server.plugins.compression.gzip
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -49,6 +49,7 @@ fun Application.module() {
     val logger = LoggerFactory.getLogger(javaClass)
 
     configurePlugins()
+    configureStatusPages()
     setupConfig(logger)
     configureJwtAuthentication()
     configureRouting()
