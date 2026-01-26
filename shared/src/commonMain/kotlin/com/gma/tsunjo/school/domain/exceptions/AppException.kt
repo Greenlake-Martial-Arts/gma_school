@@ -20,6 +20,7 @@ sealed class AppException(message: String, cause: Throwable? = null) : Exception
     // Student
     class StudentAlreadyExists(message: String) : AppException(message)
     class StudentNotFound(id: Long) : AppException("Student with id $id not found")
+    class StudentProgressNotFound(id: Long) : AppException("Student progress with id $id not found")
     
     // Role
     class RoleNotFound(name: String) : AppException("Role '$name' not found")
@@ -42,6 +43,7 @@ sealed class AppException(message: String, cause: Throwable? = null) : Exception
     class MoveCategoryAlreadyExists(message: String) : AppException(message)
     
     // Attendance
+    class AttendanceNotFound(id: Long) : AppException("Attendance with id $id not found")
     class AttendanceAlreadyExists(message: String) : AppException(message)
     
     // Validation & Request
