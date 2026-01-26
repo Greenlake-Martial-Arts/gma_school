@@ -44,7 +44,7 @@ class AuthRoutesIntegrationTest : BaseIntegrationTest() {
             setBody(Json.encodeToString(LoginRequest.serializer(), request))
         }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid credentials"))
+        assertTrue(response.bodyAsText().contains("Invalid username or password"))
     }
 
     @Test
@@ -63,7 +63,7 @@ class AuthRoutesIntegrationTest : BaseIntegrationTest() {
             setBody(Json.encodeToString(LoginRequest.serializer(), loginRequest))
         }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid credentials"))
+        assertTrue(response.bodyAsText().contains("Invalid username or password"))
     }
 
     @Test

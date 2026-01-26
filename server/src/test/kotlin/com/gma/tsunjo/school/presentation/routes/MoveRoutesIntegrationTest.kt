@@ -45,7 +45,7 @@ class MoveRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("Move not found"))
+        assertTrue(response.bodyAsText().containsError("Move with id 999 not found"))
     }
 
     @Test
@@ -101,6 +101,6 @@ class MoveRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("Move not found"))
+        assertTrue(response.bodyAsText().containsError("Move with id 999 not found"))
     }
 }

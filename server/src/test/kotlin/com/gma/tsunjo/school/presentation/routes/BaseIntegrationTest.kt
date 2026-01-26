@@ -18,7 +18,6 @@ import com.gma.school.database.data.tables.UserRolesTable
 import com.gma.school.database.data.tables.UsersTable
 import com.gma.tsunjo.school.api.requests.LoginRequest
 import com.gma.tsunjo.school.config.configureJwtAuthentication
-import com.gma.tsunjo.school.config.configureStatusPages
 import com.gma.tsunjo.school.configurePlugins
 import com.gma.tsunjo.school.configureRouting
 import io.ktor.client.request.post
@@ -123,7 +122,6 @@ abstract class BaseIntegrationTest {
 
         configurePlugins()
         configureJwtAuthentication()
-        configureStatusPages()
         configureRouting()
     }
 

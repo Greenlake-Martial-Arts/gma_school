@@ -46,7 +46,7 @@ class MoveCategoryRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("Move category not found"))
+        assertTrue(response.bodyAsText().containsError("Move category with id 999 not found"))
     }
 
     @Test
@@ -118,6 +118,6 @@ class MoveCategoryRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("Move category not found"))
+        assertTrue(response.bodyAsText().containsError("Move category with id 999 not found"))
     }
 }

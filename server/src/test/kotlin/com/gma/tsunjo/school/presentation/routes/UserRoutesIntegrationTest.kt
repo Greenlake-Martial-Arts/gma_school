@@ -58,7 +58,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("User not found"))
+        assertTrue(response.bodyAsText().containsError("User with id 999 not found"))
     }
 
     @Test
@@ -70,7 +70,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
         }
         assertEquals(HttpStatusCode.Created, response.status)
         val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-        assertTrue(json["error"]?.jsonPrimitive?.content?.contains("create@example.com") == true)
+        assertTrue(json["username"]?.jsonPrimitive?.content?.contains("create@example.com") == true)
     }
 
     @Test
@@ -126,7 +126,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-        assertTrue(json["error"]?.jsonPrimitive?.content?.contains("updated@example.com") == true)
+        assertTrue(json["username"]?.jsonPrimitive?.content?.contains("updated@example.com") == true)
     }
 
     @Test
@@ -152,7 +152,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             setBody(Json.encodeToString(UpdateUserRequest.serializer(), request))
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("User not found"))
+        assertTrue(response.bodyAsText().containsError("User with id 999 not found"))
     }
 
     @Test
@@ -175,8 +175,7 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.OK, response.status)
-        val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-        assertTrue(json["error"]?.jsonPrimitive?.content?.contains("User deactivated") == true)
+        assertTrue(response.bodyAsText().contains("User deactivated"))
     }
 
     @Test
@@ -196,6 +195,6 @@ class UserRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("User not found"))
+        assertTrue(response.bodyAsText().containsError("User with id 999 not found"))
     }
 }

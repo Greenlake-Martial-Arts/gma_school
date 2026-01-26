@@ -47,7 +47,7 @@ class LevelRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("Level not found"))
+        assertTrue(response.bodyAsText().containsError("Level with id 999 not found"))
     }
 
     @Test
@@ -141,6 +141,6 @@ class LevelRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("Level not found"))
+        assertTrue(response.bodyAsText().containsError("Level with id 999 not found"))
     }
 }

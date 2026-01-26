@@ -47,7 +47,7 @@ class AttendanceRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().containsError("Attendance not found"))
+        assertTrue(response.bodyAsText().containsError("Attendance with id 999 not found"))
     }
 
     @Test
