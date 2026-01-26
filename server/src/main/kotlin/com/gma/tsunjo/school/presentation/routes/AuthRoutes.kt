@@ -18,24 +18,25 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import org.koin.ktor.ext.inject
+import org.koin.ktor.ext.get
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 fun Application.authRoutes() {
     val logger = LoggerFactory.getLogger(javaClass)
+    val userRepository = get<UserRepository>()
+    val jwtTokenGenerator = get<JwtTokenGenerator>()
+    
     routing {
         logger.debug("<<<< authRoutes")
         route("/auth") {
-            register(logger)
-            login(logger)
+            register(logger, userRepository)
+            login(logger, userRepository, jwtTokenGenerator)
         }
     }
 }
 
-fun Route.register(logger: Logger) {
-    val userRepository by inject<UserRepository>()
-
+fun Route.register(logger: Logger, userRepository: UserRepository) {
     post("/register") {
         logger.debug("<<<< POST /auth/register")
         val request = call.receive<CreateUserRequest>()
@@ -55,10 +56,11 @@ fun Route.register(logger: Logger) {
     }
 }
 
-fun Route.login(logger: Logger) {
-    val userRepository by inject<UserRepository>()
-    val jwtTokenGenerator by inject<JwtTokenGenerator>()
-
+fun Route.login(
+    logger: Logger,
+    userRepository: UserRepository,
+    jwtTokenGenerator: JwtTokenGenerator
+) {
     post("/login") {
         logger.debug("<<<< POST /auth/login")
 

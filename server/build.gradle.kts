@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.ktor.serverNetty)
     implementation(libs.ktor.serverContentNegotiation)
     implementation(libs.ktor.serverCompression)
+    implementation(libs.ktor.serverStatusPages)
     implementation(libs.ktor.serializationKotlinxJson)
     implementation(libs.ktor.serverHostJvm)
     implementation(libs.ktor.serverAuth)
@@ -37,7 +38,9 @@ dependencies {
     implementation(libs.typesafe.config)
 
     // Koin for Ktor
-    implementation(libs.koin.ktor)
+    implementation(libs.koin.ktor) {
+        exclude(group = "io.ktor")
+    }
     implementation(libs.koin.logger.slf4j)
 
     testImplementation(libs.ktor.serverTestHost)
