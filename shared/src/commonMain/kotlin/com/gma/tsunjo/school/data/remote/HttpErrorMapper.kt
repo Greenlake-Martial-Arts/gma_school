@@ -10,8 +10,8 @@ object HttpErrorMapper {
         return when (statusCode) {
             HttpStatusCode.Unauthorized -> AppException.InvalidCredentials()
             HttpStatusCode.Forbidden -> AppException.Unauthorized()
+            HttpStatusCode.BadRequest -> AppException.BadRequest(message.ifEmpty { "Invalid request format" })
             HttpStatusCode.NotFound -> AppException.ValidationError(message.ifEmpty { "Not found" })
-            HttpStatusCode.BadRequest -> AppException.ValidationError(message.ifEmpty { "Bad request" })
             HttpStatusCode.Conflict -> AppException.ValidationError(message.ifEmpty { "Conflict" })
             in HttpStatusCode.InternalServerError..HttpStatusCode.GatewayTimeout -> 
                 AppException.ServerError(message.ifEmpty { "Server error" })

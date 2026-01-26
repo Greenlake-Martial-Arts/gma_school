@@ -13,6 +13,26 @@
 
 ---
 
+## Testing Rules
+
+**CRITICAL: Never modify production code to make tests work.**
+
+- Do NOT make classes `open` just for testing
+- Do NOT convert classes to interfaces just for mocking
+- Do NOT add test-specific parameters to production code
+- If you cannot test without modifying production code, ASK first
+- Only test mappers and pure functions that don't require mocking
+- For integration tests, use real implementations or skip the test
+
+**CRITICAL: All tests must pass before creating a PR.**
+
+- Run all tests before committing: `./gradlew test`
+- If tests fail, fix them before pushing
+- Update tests when production code changes
+- Never skip or ignore failing tests
+
+---
+
 ## Theme System - Source of Truth
 
 All visual styling must come from the theme system. **No hardcoded values.**

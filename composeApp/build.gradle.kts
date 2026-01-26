@@ -63,6 +63,10 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.ktor.client.mock)
+            implementation(libs.ktor.client.contentNegotiation)
+            implementation(libs.ktor.serializationKotlinxJson)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)

@@ -2,6 +2,8 @@
 
 package com.gma.tsunjo.school.presentation.routes
 
+import com.gma.tsunjo.school.domain.exceptions.AppException
+
 import com.gma.tsunjo.school.domain.repositories.MemberTypeRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -47,15 +49,15 @@ fun Route.getMemberTypeById(logger: Logger) {
         logger.debug("GET /member-types/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@get
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val memberType = memberTypeRepository.getMemberTypeById(id)
         if (memberType != null) {
             call.respond(memberType)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Member type not found")
+            throw AppException.MemberTypeNotFound(id)
         }
     }
 }

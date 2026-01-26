@@ -2,9 +2,11 @@
 
 package com.gma.tsunjo.school.presentation.routes
 
+import com.gma.tsunjo.school.domain.exceptions.AppException
+
 import com.gma.tsunjo.school.api.requests.CreateAttendanceRequest
 import com.gma.tsunjo.school.domain.repositories.AttendanceRepository
-import com.gma.tsunjo.school.presentation.extensions.respondWithError
+
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -63,15 +65,15 @@ fun Route.getAttendanceById(logger: Logger) {
         logger.debug("GET /attendance/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@get
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val attendance = attendanceRepository.getAttendanceById(id)
         if (attendance != null) {
             call.respond(attendance)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Attendance not found")
+            throw AppException.ValidationError("Attendance not found")
         }
     }
 }
@@ -85,8 +87,8 @@ fun Route.getAttendancesByDateRange(logger: Logger) {
         logger.debug("GET /attendance/date-range?startDate=$startDate&endDate=$endDate")
 
         if (startDate == null || endDate == null) {
-            call.respond(HttpStatusCode.BadRequest, "startDate and endDate parameters required")
-            return@get
+            throw AppException.BadRequest("startDate and endDate parameters required")
+            
         }
 
         val attendances = attendanceRepository.getAttendancesByDateRange(startDate, endDate)
@@ -104,7 +106,7 @@ fun Route.createAttendance(logger: Logger) {
 
         result.fold(
             onSuccess = { call.respond(HttpStatusCode.Created, it) },
-            onFailure = { call.respondWithError(it) }
+            onFailure = { throw it }
         )
     }
 }
@@ -117,8 +119,8 @@ fun Route.updateAttendance(logger: Logger) {
         logger.debug("PUT /attendance/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@put
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val request = call.receive<CreateAttendanceRequest>()
@@ -127,7 +129,7 @@ fun Route.updateAttendance(logger: Logger) {
         if (updated) {
             call.respond(HttpStatusCode.OK, "Attendance updated")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Attendance not found")
+            throw AppException.ValidationError("Attendance not found")
         }
     }
 }
@@ -140,8 +142,8 @@ fun Route.deleteAttendance(logger: Logger) {
         logger.debug("DELETE /attendance/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@delete
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val deleted = attendanceRepository.deleteAttendance(id)
@@ -149,7 +151,7 @@ fun Route.deleteAttendance(logger: Logger) {
         if (deleted) {
             call.respond(HttpStatusCode.OK, "Attendance deleted")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Attendance not found")
+            throw AppException.ValidationError("Attendance not found")
         }
     }
 }
@@ -163,8 +165,8 @@ fun Route.addStudentToAttendance(logger: Logger) {
         logger.debug("POST /attendance/$id/students/$studentId")
 
         if (id == null || studentId == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid attendance ID or student ID")
-            return@post
+            throw AppException.BadRequest("Invalid attendance ID or student ID")
+            
         }
 
         val added = attendanceRepository.addStudentToAttendance(id, studentId)
@@ -172,7 +174,7 @@ fun Route.addStudentToAttendance(logger: Logger) {
         if (added) {
             call.respond(HttpStatusCode.OK, "Student added to attendance")
         } else {
-            call.respond(HttpStatusCode.BadRequest, "Failed to add student to attendance")
+            throw AppException.BadRequest("Failed to add student to attendance")
         }
     }
 }
@@ -185,8 +187,8 @@ fun Route.addStudentsToAttendanceBulk(logger: Logger) {
         logger.debug("POST /attendance/$id/students/bulk")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid attendance ID")
-            return@post
+            throw AppException.BadRequest("Invalid attendance ID")
+            
         }
 
         val request = call.receive<com.gma.tsunjo.school.api.requests.BulkAddStudentsRequest>()
@@ -205,8 +207,8 @@ fun Route.removeStudentFromAttendance(logger: Logger) {
         logger.debug("DELETE /attendance/$id/students/$studentId")
 
         if (id == null || studentId == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid attendance ID or student ID")
-            return@delete
+            throw AppException.BadRequest("Invalid attendance ID or student ID")
+            
         }
 
         val removed = attendanceRepository.removeStudentFromAttendance(id, studentId)
@@ -214,7 +216,7 @@ fun Route.removeStudentFromAttendance(logger: Logger) {
         if (removed) {
             call.respond(HttpStatusCode.OK, "Student removed from attendance")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Student not found in attendance")
+            throw AppException.ValidationError("Student not found in attendance")
         }
     }
 }
@@ -227,8 +229,8 @@ fun Route.getStudentsInAttendance(logger: Logger) {
         logger.debug("GET /attendance/$id/students")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@get
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val studentIds = attendanceRepository.getStudentsInAttendance(id)
@@ -244,15 +246,15 @@ fun Route.getAttendanceWithStudents(logger: Logger) {
         logger.debug("GET /attendance/$id/with-students")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@get
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val attendanceWithStudents = attendanceRepository.getAttendanceWithStudents(id)
         if (attendanceWithStudents != null) {
             call.respond(attendanceWithStudents)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Attendance not found")
+            throw AppException.ValidationError("Attendance not found")
         }
     }
 }

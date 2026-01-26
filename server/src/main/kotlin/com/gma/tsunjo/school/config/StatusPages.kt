@@ -19,8 +19,11 @@ fun Application.configureStatusPages() {
         exception<AppException.SessionExpired> { call, _ ->
             call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Session expired"))
         }
-        exception<AppException.ValidationError> { call, cause ->
+        exception<AppException.BadRequest> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, mapOf("error" to cause.message))
+        }
+        exception<AppException.ValidationError> { call, cause ->
+            call.respond(HttpStatusCode.UnprocessableEntity, mapOf("error" to cause.message))
         }
         exception<AppException.UserNotFound> { call, cause ->
             call.respond(HttpStatusCode.NotFound, mapOf("error" to cause.message))

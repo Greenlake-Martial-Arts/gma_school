@@ -44,7 +44,8 @@ sealed class AppException(message: String, cause: Throwable? = null) : Exception
     // Attendance
     class AttendanceAlreadyExists(message: String) : AppException(message)
     
-    // Validation
+    // Validation & Request
+    class BadRequest(message: String = "Invalid request format") : AppException(message)
     class ValidationError(message: String) : AppException(message)
     
     // Database

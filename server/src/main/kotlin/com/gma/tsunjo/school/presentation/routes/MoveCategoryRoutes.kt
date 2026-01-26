@@ -2,9 +2,11 @@
 
 package com.gma.tsunjo.school.presentation.routes
 
+import com.gma.tsunjo.school.domain.exceptions.AppException
+
 import com.gma.tsunjo.school.api.requests.CreateMoveCategoryRequest
 import com.gma.tsunjo.school.domain.repositories.MoveCategoryRepository
-import com.gma.tsunjo.school.presentation.extensions.respondWithError
+
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -56,15 +58,15 @@ fun Route.getMoveCategoryById(logger: Logger) {
         logger.debug("GET /move-categories/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@get
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val category = moveCategoryRepository.getMoveCategoryById(id)
         if (category != null) {
             call.respond(category)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Move category not found")
+            throw AppException.MoveCategoryNotFound(id)
         }
     }
 }
@@ -79,7 +81,7 @@ fun Route.createMoveCategory(logger: Logger) {
 
         result.fold(
             onSuccess = { call.respond(HttpStatusCode.Created, it) },
-            onFailure = { call.respondWithError(it) }
+            onFailure = { throw it }
         )
     }
 }
@@ -92,8 +94,8 @@ fun Route.updateMoveCategory(logger: Logger) {
         logger.debug("PUT /move-categories/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@put
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val request = call.receive<CreateMoveCategoryRequest>()
@@ -102,7 +104,7 @@ fun Route.updateMoveCategory(logger: Logger) {
         if (updated) {
             call.respond(HttpStatusCode.OK, "Move category updated")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Move category not found")
+            throw AppException.MoveCategoryNotFound(id)
         }
     }
 }
@@ -115,8 +117,8 @@ fun Route.deleteMoveCategory(logger: Logger) {
         logger.debug("DELETE /move-categories/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@delete
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val deleted = moveCategoryRepository.deleteMoveCategory(id)
@@ -124,7 +126,7 @@ fun Route.deleteMoveCategory(logger: Logger) {
         if (deleted) {
             call.respond(HttpStatusCode.OK, "Move category deleted")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Move category not found")
+            throw AppException.MoveCategoryNotFound(id)
         }
     }
 }

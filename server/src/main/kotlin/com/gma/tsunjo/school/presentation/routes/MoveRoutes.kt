@@ -2,9 +2,11 @@
 
 package com.gma.tsunjo.school.presentation.routes
 
+import com.gma.tsunjo.school.domain.exceptions.AppException
+
 import com.gma.tsunjo.school.api.requests.CreateMoveRequest
 import com.gma.tsunjo.school.domain.repositories.MoveRepository
-import com.gma.tsunjo.school.presentation.extensions.respondWithError
+
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -55,15 +57,15 @@ fun Route.getMoveById(logger: Logger) {
         logger.debug("GET /moves/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@get
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val move = moveRepository.getMoveById(id)
         if (move != null) {
             call.respond(move)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Move not found")
+            throw AppException.MoveNotFound(id)
         }
     }
 }
@@ -76,8 +78,8 @@ fun Route.getMovesByCategory(logger: Logger) {
         logger.debug("GET /moves/category/$categoryId")
 
         if (categoryId == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid category ID")
-            return@get
+            throw AppException.BadRequest("Invalid category ID")
+            
         }
 
         val moves = moveRepository.getMovesByCategory(categoryId)
@@ -95,7 +97,7 @@ fun Route.createMove(logger: Logger) {
 
         result.fold(
             onSuccess = { call.respond(HttpStatusCode.Created, it) },
-            onFailure = { call.respondWithError(it) }
+            onFailure = { throw it }
         )
     }
 }
@@ -108,8 +110,8 @@ fun Route.deleteMove(logger: Logger) {
         logger.debug("DELETE /moves/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@delete
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val deleted = moveRepository.deleteMove(id)
@@ -117,7 +119,7 @@ fun Route.deleteMove(logger: Logger) {
         if (deleted) {
             call.respond(HttpStatusCode.OK, "Move deleted")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Move not found")
+            throw AppException.MoveNotFound(id)
         }
     }
 }

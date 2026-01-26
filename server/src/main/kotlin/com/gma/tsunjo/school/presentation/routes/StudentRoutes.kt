@@ -2,11 +2,13 @@
 
 package com.gma.tsunjo.school.presentation.routes
 
+import com.gma.tsunjo.school.domain.exceptions.AppException
+
 import com.gma.tsunjo.school.api.requests.CreateStudentRequest
 import com.gma.tsunjo.school.api.requests.UpdateStudentRequest
 import com.gma.tsunjo.school.domain.repositories.StudentRepository
 import com.gma.tsunjo.school.domain.services.StudentService
-import com.gma.tsunjo.school.presentation.extensions.respondWithError
+
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -71,8 +73,8 @@ fun Route.getStudentsByLevel(logger: Logger) {
         logger.debug("GET /students/level/$levelId")
 
         if (levelId == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid level ID")
-            return@get
+            throw AppException.BadRequest("Invalid level ID")
+            
         }
 
         val students = studentRepository.getStudentsByLevel(levelId)
@@ -88,15 +90,15 @@ fun Route.getStudentById(logger: Logger) {
         logger.debug("GET /students/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid student ID")
-            return@get
+            throw AppException.BadRequest("Invalid student ID")
+            
         }
 
         val student = studentRepository.getStudentById(id)
         if (student != null) {
             call.respond(student)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Student not found")
+            throw AppException.StudentNotFound(id)
         }
     }
 }
@@ -123,7 +125,7 @@ fun Route.createStudent(logger: Logger) {
                 call.respond(HttpStatusCode.Created, student)
             },
             onFailure = { error ->
-                call.respondWithError(error)
+                throw error
             }
         )
     }
@@ -137,8 +139,8 @@ fun Route.updateStudent(logger: Logger) {
         logger.debug("PUT /students/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid student ID")
-            return@put
+            throw AppException.BadRequest("Invalid student ID")
+            
         }
 
         val request = call.receive<UpdateStudentRequest>()
@@ -156,7 +158,7 @@ fun Route.updateStudent(logger: Logger) {
         if (student != null) {
             call.respond(student)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Student not found")
+            throw AppException.StudentNotFound(id)
         }
     }
 }
@@ -169,15 +171,15 @@ fun Route.deactivateStudent(logger: Logger) {
         logger.debug("PATCH /students/$id/deactivate")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid student ID")
-            return@patch
+            throw AppException.BadRequest("Invalid student ID")
+            
         }
 
         val deactivated = studentService.deactivateStudent(id)
         if (deactivated) {
             call.respond(HttpStatusCode.OK, "Student deactivated")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Student not found")
+            throw AppException.StudentNotFound(id)
         }
     }
 }
@@ -190,15 +192,15 @@ fun Route.activateStudent(logger: Logger) {
         logger.debug("PATCH /students/$id/activate")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid student ID")
-            return@patch
+            throw AppException.BadRequest("Invalid student ID")
+            
         }
 
         val activated = studentService.activateStudent(id)
         if (activated) {
             call.respond(HttpStatusCode.OK, "Student activated")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Student not found")
+            throw AppException.StudentNotFound(id)
         }
     }
 }

@@ -2,10 +2,12 @@
 
 package com.gma.tsunjo.school.presentation.routes
 
+import com.gma.tsunjo.school.domain.exceptions.AppException
+
 import com.gma.tsunjo.school.api.requests.CreateStudentProgressRequest
 import com.gma.tsunjo.school.api.requests.UpdateStudentProgressRequest
 import com.gma.tsunjo.school.domain.repositories.StudentProgressRepository
-import com.gma.tsunjo.school.presentation.extensions.respondWithError
+
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -60,15 +62,15 @@ fun Route.getStudentProgressById(logger: Logger) {
         logger.debug("GET /student-progress/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@get
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val progress = repository.getProgressById(id)
         if (progress != null) {
             call.respond(progress)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Progress not found")
+            throw AppException.ValidationError("Progress not found")
         }
     }
 }
@@ -81,8 +83,8 @@ fun Route.getProgressByStudent(logger: Logger) {
         logger.debug("GET /student-progress/student/$studentId")
 
         if (studentId == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid student ID")
-            return@get
+            throw AppException.BadRequest("Invalid student ID")
+            
         }
 
         val progress = repository.getProgressByStudent(studentId)
@@ -99,15 +101,15 @@ fun Route.getProgressByStudentAndLevel(logger: Logger) {
         logger.debug("GET /student-progress/student/$studentId/level/$levelId")
 
         if (studentId == null || levelId == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid student ID or level ID")
-            return@get
+            throw AppException.BadRequest("Invalid student ID or level ID")
+            
         }
 
         val progress = repository.getProgressByStudentAndLevel(studentId, levelId)
         if (progress != null) {
             call.respond(progress)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Level not found")
+            throw AppException.LevelNotFound(levelId)
         }
     }
 }
@@ -128,7 +130,7 @@ fun Route.createStudentProgress(logger: Logger) {
 
         result.fold(
             onSuccess = { call.respond(HttpStatusCode.Created, it) },
-            onFailure = { call.respondWithError(it) }
+            onFailure = { throw it }
         )
     }
 }
@@ -141,8 +143,8 @@ fun Route.updateStudentProgress(logger: Logger) {
         logger.debug("PUT /student-progress/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@put
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val request = call.receive<UpdateStudentProgressRequest>()
@@ -157,7 +159,7 @@ fun Route.updateStudentProgress(logger: Logger) {
         if (updated) {
             call.respond(HttpStatusCode.OK, "Progress updated")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Progress not found")
+            throw AppException.ValidationError("Progress not found")
         }
     }
 }
@@ -189,15 +191,15 @@ fun Route.deleteStudentProgress(logger: Logger) {
         logger.debug("DELETE /student-progress/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@delete
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val deleted = repository.deleteProgress(id)
         if (deleted) {
             call.respond(HttpStatusCode.OK, "Progress deleted")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Progress not found")
+            throw AppException.ValidationError("Progress not found")
         }
     }
 }

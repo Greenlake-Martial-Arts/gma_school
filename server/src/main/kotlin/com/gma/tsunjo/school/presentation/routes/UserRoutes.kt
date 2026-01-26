@@ -4,8 +4,9 @@ package com.gma.tsunjo.school.presentation.routes
 
 import com.gma.tsunjo.school.api.requests.CreateUserRequest
 import com.gma.tsunjo.school.api.requests.UpdateUserRequest
+import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.repositories.UserRepository
-import com.gma.tsunjo.school.presentation.extensions.respondWithError
+
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -68,15 +69,14 @@ fun Route.getUserById(logger: Logger) {
         logger.debug("GET /users/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
-            return@get
+            throw AppException.BadRequest("Invalid user ID")
         }
 
         val user = userRepository.getUserById(id)
         if (user != null) {
             call.respond(user)
         } else {
-            call.respond(HttpStatusCode.NotFound, "User not found")
+            throw AppException.UserNotFound(id)
         }
     }
 }
@@ -97,7 +97,7 @@ fun Route.createUser(logger: Logger) {
                 call.respond(HttpStatusCode.Created, user)
             },
             onFailure = { error ->
-                call.respondWithError(error)
+                throw error
             }
         )
     }
@@ -111,8 +111,7 @@ fun Route.updateUser(logger: Logger) {
         logger.debug("PUT /users/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
-            return@put
+            throw AppException.BadRequest("Invalid user ID")
         }
 
         val request = call.receive<UpdateUserRequest>()
@@ -125,7 +124,7 @@ fun Route.updateUser(logger: Logger) {
         if (user != null) {
             call.respond(user)
         } else {
-            call.respond(HttpStatusCode.NotFound, "User not found")
+            throw AppException.UserNotFound(id)
         }
     }
 }
@@ -138,15 +137,14 @@ fun Route.deactivateUser(logger: Logger) {
         logger.debug("PATCH /users/$id/deactivate")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
-            return@patch
+            throw AppException.BadRequest("Invalid user ID")
         }
 
         val deactivated = userRepository.setUserActiveStatus(id, false)
         if (deactivated) {
             call.respond(HttpStatusCode.OK, "User deactivated")
         } else {
-            call.respond(HttpStatusCode.NotFound, "User not found")
+            throw AppException.UserNotFound(id)
         }
     }
 }
@@ -159,15 +157,14 @@ fun Route.activateUser(logger: Logger) {
         logger.debug("PATCH /users/$id/activate")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
-            return@patch
+            throw AppException.BadRequest("Invalid user ID")
         }
 
         val activated = userRepository.setUserActiveStatus(id, true)
         if (activated) {
             call.respond(HttpStatusCode.OK, "User activated")
         } else {
-            call.respond(HttpStatusCode.NotFound, "User not found")
+            throw AppException.UserNotFound(id)
         }
     }
 }

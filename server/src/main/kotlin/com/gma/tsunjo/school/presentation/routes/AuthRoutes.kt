@@ -7,8 +7,8 @@ import com.gma.tsunjo.school.api.requests.LoginRequest
 import com.gma.tsunjo.school.api.responses.LoginResponse
 import com.gma.tsunjo.school.api.responses.UserInfo
 import com.gma.tsunjo.school.config.JwtTokenGenerator
+import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.repositories.UserRepository
-import com.gma.tsunjo.school.presentation.extensions.respondWithError
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -50,7 +50,7 @@ fun Route.register(logger: Logger, userRepository: UserRepository) {
                 call.respond(HttpStatusCode.Created, user)
             },
             onFailure = { error ->
-                call.respondWithError(error)
+                throw error
             }
         )
     }
@@ -68,8 +68,7 @@ fun Route.login(
             call.receive<LoginRequest>()
         } catch (e: Exception) {
             logger.error("<<<< Failed to parse login request: ${e.message}")
-            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid request format"))
-            return@post
+            throw AppException.BadRequest("Invalid request format")
         }
 
         logger.debug("<<<< username: ${credentials.username}")
@@ -92,10 +91,7 @@ fun Route.login(
             },
             onFailure = {
                 logger.error("<<<< Authentication failed: Invalid credentials")
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    mapOf("error" to "Invalid credentials")
-                )
+                throw AppException.InvalidCredentials()
             }
         )
     }

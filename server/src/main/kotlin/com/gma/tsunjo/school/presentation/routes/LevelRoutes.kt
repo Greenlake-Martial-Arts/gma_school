@@ -2,10 +2,12 @@
 
 package com.gma.tsunjo.school.presentation.routes
 
+import com.gma.tsunjo.school.domain.exceptions.AppException
+
 import com.gma.tsunjo.school.api.requests.CreateLevelRequest
 import com.gma.tsunjo.school.api.requests.UpdateLevelRequest
 import com.gma.tsunjo.school.domain.repositories.LevelRepository
-import com.gma.tsunjo.school.presentation.extensions.respondWithError
+
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -58,15 +60,15 @@ fun Route.getLevelById(logger: Logger) {
         logger.debug("GET /levels/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@get
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val level = levelRepository.getLevelById(id)
         if (level != null) {
             call.respond(level)
         } else {
-            call.respond(HttpStatusCode.NotFound, "Level not found")
+            throw AppException.LevelNotFound(id)
         }
     }
 }
@@ -79,8 +81,8 @@ fun Route.getStudentsInLevel(logger: Logger) {
         logger.debug("GET /levels/$id/students")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@get
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val students = studentRepository.getStudentsByLevel(id)
@@ -98,7 +100,7 @@ fun Route.createLevel(logger: Logger) {
 
         result.fold(
             onSuccess = { call.respond(HttpStatusCode.Created, it) },
-            onFailure = { call.respondWithError(it) }
+            onFailure = { throw it }
         )
     }
 }
@@ -111,8 +113,8 @@ fun Route.updateLevel(logger: Logger) {
         logger.debug("PUT /levels/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@put
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val request = call.receive<UpdateLevelRequest>()
@@ -121,7 +123,7 @@ fun Route.updateLevel(logger: Logger) {
         if (updated) {
             call.respond(HttpStatusCode.OK, "Level updated")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Level not found")
+            throw AppException.LevelNotFound(id)
         }
     }
 }
@@ -134,8 +136,8 @@ fun Route.deleteLevel(logger: Logger) {
         logger.debug("DELETE /levels/$id")
 
         if (id == null) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
-            return@delete
+            throw AppException.BadRequest("Invalid ID")
+            
         }
 
         val deleted = levelRepository.deleteLevel(id)
@@ -143,7 +145,7 @@ fun Route.deleteLevel(logger: Logger) {
         if (deleted) {
             call.respond(HttpStatusCode.OK, "Level deleted")
         } else {
-            call.respond(HttpStatusCode.NotFound, "Level not found")
+            throw AppException.LevelNotFound(id)
         }
     }
 }
