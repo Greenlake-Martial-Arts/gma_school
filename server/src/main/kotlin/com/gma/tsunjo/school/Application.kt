@@ -19,6 +19,7 @@ import com.gma.tsunjo.school.presentation.routes.studentRoutes
 import com.gma.tsunjo.school.presentation.routes.userRoutes
 import com.typesafe.config.ConfigFactory
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -28,6 +29,7 @@ import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.compression.Compression
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.compression.gzip
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.httpMethod
@@ -54,6 +56,21 @@ fun Application.module() {
 }
 
 fun Application.configurePlugins() {
+    install(CORS) {
+        // FIXME: Remove this or upload to the same server
+        allowHost("localhost:8081")
+        allowHost("127.0.0.1:8081")
+        allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Patch)
+        allowMethod(HttpMethod.Delete)
+        allowHeader(HttpHeaders.Authorization)
+        allowHeader(HttpHeaders.ContentType)
+        allowCredentials = true
+    }
+
     install(Koin) {
         slf4jLogger()
         modules(appModule)
