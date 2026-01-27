@@ -35,7 +35,7 @@ class MoveRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test
@@ -45,7 +45,7 @@ class MoveRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().contains("Move not found"))
+        assertTrue(response.bodyAsText().containsError("Move with id 999 not found"))
     }
 
     @Test
@@ -64,7 +64,7 @@ class MoveRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid category ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid category ID"))
     }
 
     @Test
@@ -91,7 +91,7 @@ class MoveRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test
@@ -101,6 +101,6 @@ class MoveRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().contains("Move not found"))
+        assertTrue(response.bodyAsText().containsError("Move with id 999 not found"))
     }
 }

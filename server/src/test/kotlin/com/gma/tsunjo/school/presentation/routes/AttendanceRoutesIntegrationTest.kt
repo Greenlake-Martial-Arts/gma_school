@@ -37,7 +37,7 @@ class AttendanceRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test
@@ -47,7 +47,7 @@ class AttendanceRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().contains("Attendance not found"))
+        assertTrue(response.bodyAsText().containsError("Attendance with id 999 not found"))
     }
 
     @Test
@@ -66,7 +66,7 @@ class AttendanceRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("startDate and endDate parameters required"))
+        assertTrue(response.bodyAsText().containsError("startDate and endDate parameters required"))
     }
 
     @Test
@@ -118,7 +118,7 @@ class AttendanceRoutesIntegrationTest : BaseIntegrationTest() {
         }
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test
@@ -128,7 +128,7 @@ class AttendanceRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test
@@ -138,7 +138,7 @@ class AttendanceRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid attendance ID or student ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid attendance ID or student ID"))
     }
 
     @Test
@@ -148,7 +148,7 @@ class AttendanceRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid attendance ID or student ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid attendance ID or student ID"))
     }
 
     @Test
@@ -167,6 +167,6 @@ class AttendanceRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 }

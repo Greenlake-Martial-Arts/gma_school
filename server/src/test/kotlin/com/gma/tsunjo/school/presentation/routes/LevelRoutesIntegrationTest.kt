@@ -37,7 +37,7 @@ class LevelRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test
@@ -47,7 +47,7 @@ class LevelRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().contains("Level not found"))
+        assertTrue(response.bodyAsText().containsError("Level with id 999 not found"))
     }
 
     @Test
@@ -121,7 +121,7 @@ class LevelRoutesIntegrationTest : BaseIntegrationTest() {
         }
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test
@@ -131,7 +131,7 @@ class LevelRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        assertTrue(response.bodyAsText().contains("Invalid ID"))
+        assertTrue(response.bodyAsText().containsError("Invalid ID"))
     }
 
     @Test
@@ -141,6 +141,6 @@ class LevelRoutesIntegrationTest : BaseIntegrationTest() {
             bearerAuth(token)
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
-        assertTrue(response.bodyAsText().contains("Level not found"))
+        assertTrue(response.bodyAsText().containsError("Level with id 999 not found"))
     }
 }

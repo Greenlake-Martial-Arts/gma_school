@@ -160,4 +160,10 @@ abstract class BaseIntegrationTest {
         cachedAuthToken = token
         return token
     }
+
+    // Helper function to check if error response contains expected message
+    protected fun String.containsError(message: String): Boolean {
+        val json = Json.parseToJsonElement(this).jsonObject
+        return json["error"]?.jsonPrimitive?.content?.contains(message) == true
+    }
 }
