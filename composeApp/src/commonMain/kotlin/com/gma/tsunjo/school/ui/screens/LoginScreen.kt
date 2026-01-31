@@ -20,11 +20,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -41,8 +47,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -54,7 +62,6 @@ import com.gma.tsunjo.school.ui.viewmodel.LoginUiState
 import com.gma.tsunjo.school.ui.viewmodel.LoginViewModel
 import gma_school.composeapp.generated.resources.Res
 import gma_school.composeapp.generated.resources.gma_logo_600_square
-import gma_school.composeapp.generated.resources.gma_logo_translucent_v2
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
@@ -88,6 +95,7 @@ fun LoginView(
     onJoinNowClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {}
 ) {
+    val focusManager = LocalFocusManager.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -140,75 +148,53 @@ fun LoginView(
             Spacer(modifier = Modifier.height(40.dp))
 
             // Email field
-            Text(
-                text = Strings.LOGIN_USERNAME_LABEL,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth(),
-                letterSpacing = 1.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                placeholder = {
+                modifier = Modifier.fillMaxWidth(),
+                label = {
                     Text(
-                        "your@email.com",
+                        Strings.LOGIN_USERNAME_LABEL,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                     focusedTextColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedTextColor = MaterialTheme.colorScheme.onBackground
                 ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                 singleLine = true,
-                enabled = uiState !is LoginUiState.Loading
+                enabled = uiState !is LoginUiState.Loading,
+                textStyle = MaterialTheme.typography.bodyMedium
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Password field
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = Strings.LOGIN_PASSWORD_LABEL,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    letterSpacing = 1.sp
-                )
-                TextButton(onClick = onForgotPasswordClick) {
-                    Text(
-                        text = "Forgot?",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                placeholder = {
+                modifier = Modifier.fillMaxWidth(),
+                label = {
                     Text(
-                        "••••••••",
+                        Strings.LOGIN_PASSWORD_LABEL, style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                modifier = Modifier.fillMaxWidth(),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Text(
-                            text = if (passwordVisible) "👁" else "👁‍🗨",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                    val image =
+                        if (passwordVisible) Icons.Filled.Visibility
+                        else Icons.Filled.VisibilityOff
+
+                    val description = if (passwordVisible) "Hide password" else "Show password"
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, description)
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
@@ -217,12 +203,22 @@ fun LoginView(
                     focusedTextColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedTextColor = MaterialTheme.colorScheme.onBackground
                 ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.clearFocus() }
+                ),
                 singleLine = true,
-                enabled = uiState !is LoginUiState.Loading
+                enabled = uiState !is LoginUiState.Loading,
+                textStyle = MaterialTheme.typography.bodyMedium
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            TextButton(onClick = onForgotPasswordClick, modifier = Modifier.align(Alignment.End)) {
+                Text(
+                    text = "Forgot Password?",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+            Spacer(modifier = Modifier.height(2.dp))
 
             // Error message
             if (uiState is LoginUiState.Error) {
@@ -300,14 +296,19 @@ fun LoginView(
     }
 }
 
+@Composable
+private fun LoginPreviewContent() {
+    LoginView(
+        uiState = LoginUiState.Idle,
+        onLoginClick = { _, _ -> }
+    )
+}
+
 @Preview
 @Composable
 fun LoginPreview() {
     GMATheme {
-        LoginView(
-            uiState = LoginUiState.Idle,
-            onLoginClick = { _, _ -> }
-        )
+        LoginPreviewContent()
     }
 }
 
@@ -315,9 +316,6 @@ fun LoginPreview() {
 @Composable
 fun LoginPreviewLight() {
     GMATheme(darkTheme = true) {
-        LoginView(
-            uiState = LoginUiState.Idle,
-            onLoginClick = { _, _ -> }
-        )
+        LoginPreviewContent()
     }
 }

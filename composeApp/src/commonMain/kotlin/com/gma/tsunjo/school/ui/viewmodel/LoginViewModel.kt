@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 
 sealed class LoginUiState {
     data object Idle : LoginUiState()
@@ -29,13 +30,27 @@ class LoginViewModel(
     fun login(username: String, password: String) {
         _uiState.value = LoginUiState.Loading
         viewModelScope.launch {
-            loginRepository.login(username, password)
-                .onSuccess { response ->
-                    _uiState.value = LoginUiState.Success(response.user, response.token)
-                }
-                .onFailure { error ->
-                    _uiState.value = LoginUiState.Error(UiErrorMapper.toMessage(error))
-                }
+            // TODO: Remove fake login when API is ready
+            if (username != "test") {
+                // Fake success for non-test users
+                _uiState.value = LoginUiState.Success(
+                    user = UserInfo(
+                        id = 1,
+                        username = username,
+                        isActive = true
+                    ),
+                    token = "fake-token-3434asdsadsadsad"
+                )
+            } else {
+                // Real API call for "test" user
+                loginRepository.login(username, password)
+                    .onSuccess { response ->
+                        _uiState.value = LoginUiState.Success(response.user, response.token)
+                    }
+                    .onFailure { error ->
+                        _uiState.value = LoginUiState.Error(UiErrorMapper.toMessage(error))
+                    }
+            }
         }
     }
 
