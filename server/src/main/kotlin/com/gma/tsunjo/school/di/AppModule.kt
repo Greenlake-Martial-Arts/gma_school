@@ -64,7 +64,7 @@ val appModule = module {
     single { UserRepository(get(), get()) }
     single { RoleRepository(get()) }
     single { StudentRepository(get(), get(), get(), get()) }
-    single { StudentProgressRepository(get(), get(), get(), get(), get(), get()) }
+    single { StudentProgressRepository(get(), get(), get(), get(), get(), get(), get()) }
     single { MemberTypeRepository(get()) }
     single { LevelRepository(get()) }
     single { MoveCategoryRepository(get()) }

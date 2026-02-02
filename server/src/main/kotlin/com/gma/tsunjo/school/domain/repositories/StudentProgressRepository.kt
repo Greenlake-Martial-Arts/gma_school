@@ -6,6 +6,7 @@ import com.gma.school.database.data.dao.LevelDao
 import com.gma.school.database.data.dao.LevelRequirementDao
 import com.gma.school.database.data.dao.MoveDao
 import com.gma.school.database.data.dao.StudentDao
+import com.gma.school.database.data.dao.StudentLevelDao
 import com.gma.school.database.data.dao.StudentProgressDao
 import com.gma.tsunjo.school.api.responses.RequirementProgress
 import com.gma.tsunjo.school.api.responses.StudentProgressByLevel
@@ -19,6 +20,7 @@ class StudentProgressRepository(
     private val levelDao: LevelDao,
     private val moveDao: MoveDao,
     private val studentDao: StudentDao,
+    private val studentLevelDao: StudentLevelDao,
     private val auditLogDao: com.gma.school.database.data.dao.AuditLogDao
 ) {
 
@@ -70,9 +72,12 @@ class StudentProgressRepository(
         return enrichProgress(progress)
     }
 
-    fun getProgressByStudent(studentId: Long): List<StudentProgressWithDetails> {
-        val progressList = studentProgressDao.findByStudent(studentId)
-        return progressList.map { enrichProgress(it) }
+    fun getProgressByStudent(studentId: Long): StudentProgressByLevel? {
+        // Get student's current level
+        val studentLevel = studentLevelDao.findByStudent(studentId) ?: return null
+        
+        // Use existing method with current level
+        return getProgressByStudentAndLevel(studentId, studentLevel.levelId)
     }
 
     private fun enrichProgress(progress: StudentProgress): StudentProgressWithDetails {

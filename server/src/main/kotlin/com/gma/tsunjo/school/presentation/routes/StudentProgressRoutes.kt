@@ -94,6 +94,9 @@ fun Route.getProgressByStudent(logger: Logger, studentProgressRepository: Studen
             }
 
             val progress = studentProgressRepository.getProgressByStudent(studentId)
+            if (progress == null) {
+                throw AppException.StudentNotFound(studentId)
+            }
             call.respond(progress)
         } catch (e: Exception) {
             call.handleException(e, logger)
