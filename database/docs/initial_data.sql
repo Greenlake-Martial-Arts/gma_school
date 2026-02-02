@@ -22,11 +22,11 @@ INSERT INTO member_types (name) VALUES
 -- Default levels (belt ranks)
 INSERT INTO levels (code, display_name, order_seq, description) VALUES
 ('BASIC', 'Basic', 1, 'Basic level for beginners'),
-('WHITE', 'White', 2, 'White belt level'),
-('BLUE', 'Blue', 3, 'Blue belt level'),
-('GREEN', 'Green', 4, 'Green belt level'),
-('BROWN', 'Brown', 5, 'Brown belt level'),
-('BLACK', 'Black', 6, 'Black belt level'),
+('WHITE', 'White Sash', 2, 'White belt level'),
+('BLUE', 'Blue Sash', 3, 'Blue belt level'),
+('GREEN', 'Green Sash', 4, 'Green belt level'),
+('BROWN', 'Brown Sash', 5, 'Brown belt level'),
+('BLACK', 'Black Sash', 6, 'Black belt level'),
 ('TEEN', 'Teen', 7, 'Teen level program');
 
 -- Move Categories
