@@ -7,6 +7,7 @@ val DarkNavy = Color(0xFF1C2340)
 val DeepRed = Color(0xFF8B1A1A)
 val BrightRed = Color(0xFFC41E3A)
 val DarkRed = Color(0xFF6B0F1A)
+val CoralRed = Color(0xFFE11028) // RGB(225, 16, 40) for logout
 
 // Neutral Colors
 val OffWhite = Color(0xFFF5F5F5)
@@ -33,7 +34,7 @@ val LightOnTertiary = White
 val LightTertiaryContainer = Color(0xFFFFD9E2)
 val LightOnTertiaryContainer = Color(0xFF3E0016)
 
-val LightError = Color(0xFFBA1A1A)
+val LightError = CoralRed
 val LightOnError = White
 val LightErrorContainer = Color(0xFFFFDAD6)
 val LightOnErrorContainer = Color(0xFF410002)
@@ -42,8 +43,8 @@ val LightBackground = White
 val LightOnBackground = Black
 val LightSurface = OffWhite
 val LightOnSurface = Black
-val LightSurfaceVariant = Color(0xFFE7E0EC)
-val LightOnSurfaceVariant = Color(0xFF49454F)
+val LightSurfaceVariant = Color(0xFFF5F5F5)
+val LightOnSurfaceVariant = Color(0xFF424242)
 
 val LightOutline = Color(0xFF79747E)
 val LightOutlineVariant = Color(0xFFCAC4D0)
@@ -64,17 +65,25 @@ val DarkOnTertiary = Color(0xFF5E1129)
 val DarkTertiaryContainer = DarkRed
 val DarkOnTertiaryContainer = Color(0xFFFFD9E2)
 
-val DarkError = Color(0xFFFFB4AB)
-val DarkOnError = Color(0xFF690005)
+val DarkError = CoralRed
+val DarkOnError = White
 val DarkErrorContainer = Color(0xFF93000A)
 val DarkOnErrorContainer = Color(0xFFFFDAD6)
 
 val DarkBackground = CharcoalGray
 val DarkOnBackground = White
-val DarkSurface = DarkNavy
+val DarkSurface = Color(0xFF1C1C1E) // Dark gray, almost black
 val DarkOnSurface = White
 val DarkSurfaceVariant = Color(0xFF49454F)
 val DarkOnSurfaceVariant = Color(0xFFCAC4D0)
 
 val DarkOutline = Color(0xFF938F99)
 val DarkOutlineVariant = Color(0xFF49454F)
+
+// Sash Colors (for martial arts ranks)
+val Basic = Color(0x00FFFBFB)
+val WhiteSash = Color(0xFFFFFFFF)
+val BlueSash = Color(0xFF0443AF)
+val GreenSash = Color(0xFF037F08)
+val BrownSash = Color(0xFF713505)
+val BlackSash = Color(0xFF000000)

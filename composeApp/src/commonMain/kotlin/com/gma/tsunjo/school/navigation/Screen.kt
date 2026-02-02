@@ -10,4 +10,34 @@ sealed interface Screen {
     
     @Serializable
     data object Dashboard : Screen
+    
+    @Serializable
+    data object Home : Screen
+    
+    @Serializable
+    data object Attendance : Screen
+    
+    @Serializable
+    data object Progress : Screen
+    
+    @Serializable
+    data class StudentProgressRecord(
+        val studentId: String,
+        val studentName: String,
+        val studentRank: String,
+        val studentRankColor: String
+    ) : Screen
+    
+    @Serializable
+    data object Settings : Screen
+    
+    @Serializable
+    data object NewAttendance : Screen
+    
+    @Serializable
+    data class AttendanceDetail(
+        val classId: String,
+        val className: String,
+        val date: String
+    ) : Screen
 }

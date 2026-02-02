@@ -133,24 +133,26 @@ fun DashboardView(
     }
 }
 
+@Composable
+private fun DashboardPreviewContent() {
+    DashboardView(
+        uiState = DashboardUiState.Idle,
+        onClearError = {}
+    )
+}
+
 @Preview
 @Composable
 fun DashboardPreview() {
     GMATheme {
-        DashboardView(
-            uiState = DashboardUiState.Idle,
-            onClearError = {}
-        )
+        DashboardPreviewContent()
     }
 }
 
 @Preview
 @Composable
 fun DashboardPreviewLight() {
-    GMATheme(darkTheme = false) {
-        DashboardView(
-            uiState = DashboardUiState.Idle,
-            onClearError = {}
-        )
+    GMATheme(darkTheme = true) {
+        DashboardPreviewContent()
     }
 }
