@@ -36,13 +36,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gma.tsunjo.school.features.settings.ui.viewmodel.SettingsViewModel
 import com.gma.tsunjo.school.theme.GMATheme
 import com.gma.tsunjo.school.ui.components.BottomNavigationBar
 import com.gma.tsunjo.school.ui.components.SearchableTopBar
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun SettingsScreen(
+    viewModel: SettingsViewModel = koinViewModel(),
     onNavigateToHome: () -> Unit,
     onNavigateToAttendance: () -> Unit,
     onNavigateToProgress: () -> Unit,
@@ -111,7 +114,7 @@ fun SettingsScreen(
                     TextButton(
                         onClick = {
                             showLogoutDialog = false
-                            onLogout()
+                            viewModel.logout(onComplete = onLogout)
                         }
                     ) {
                         Text("Log Out", color = MaterialTheme.colorScheme.error)

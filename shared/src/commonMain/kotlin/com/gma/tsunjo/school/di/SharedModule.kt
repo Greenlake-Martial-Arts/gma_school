@@ -2,6 +2,10 @@
 
 package com.gma.tsunjo.school.di
 
+import com.gma.tsunjo.school.auth.AuthenticationHandler
+import com.gma.tsunjo.school.auth.TokenManager
+import com.gma.tsunjo.school.auth.TokenManagerImpl
+import com.gma.tsunjo.school.auth.createSettings
 import com.gma.tsunjo.school.data.remote.AuthApi
 import com.gma.tsunjo.school.data.remote.HttpClientFactory
 import com.gma.tsunjo.school.data.repository.LoginRepository
@@ -19,11 +23,21 @@ import org.koin.dsl.module
 const val BASE_URL = "BASE_URL"
 
 fun sharedModule(): Module = module {
-    single { HttpClientFactory.create() }
+    // Settings and Token Manager
+    single { createSettings() }
+    single<TokenManager> { TokenManagerImpl(get()) }
+    single { AuthenticationHandler(get()) }
+
+    // HTTP Client with auth
+    single { HttpClientFactory.create(get()) }
+
+    // APIs
     single { AuthApi(get(), get(named(BASE_URL))) }
     single { HomeApi(get(), get(named(BASE_URL))) }
     single { StudentsApi(get(), get(named(BASE_URL))) }
     single { AttendanceApi(get(), get(named(BASE_URL))) }
+
+    // Repositories
     singleOf(::LoginRepository)
     singleOf(::HomeRepository)
     singleOf(::StudentsRepository)

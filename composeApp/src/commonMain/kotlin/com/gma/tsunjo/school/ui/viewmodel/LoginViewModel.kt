@@ -4,14 +4,15 @@ package com.gma.tsunjo.school.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import com.gma.tsunjo.school.api.responses.UserInfo
+import com.gma.tsunjo.school.auth.TokenManager
 import com.gma.tsunjo.school.data.repository.LoginRepository
 import com.gma.tsunjo.school.domain.exceptions.UiErrorMapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 
 sealed class LoginUiState {
     data object Idle : LoginUiState()
@@ -21,36 +22,28 @@ sealed class LoginUiState {
 }
 
 class LoginViewModel(
-    private val loginRepository: LoginRepository
+    private val loginRepository: LoginRepository,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
+    private val log = Logger.withTag("LoginViewModel")
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     fun login(username: String, password: String) {
+        log.d { "<< Login attempt for user: $username" }
         _uiState.value = LoginUiState.Loading
         viewModelScope.launch {
-            // TODO: Remove fake login when API is ready
-            if (username != "test") {
-                // Fake success for non-test users
-                _uiState.value = LoginUiState.Success(
-                    user = UserInfo(
-                        id = 1,
-                        username = username,
-                        isActive = true
-                    ),
-                    token = "fake-token-3434asdsadsadsad"
-                )
-            } else {
-                // Real API call for "test" user
-                loginRepository.login(username, password)
-                    .onSuccess { response ->
-                        _uiState.value = LoginUiState.Success(response.user, response.token)
-                    }
-                    .onFailure { error ->
-                        _uiState.value = LoginUiState.Error(UiErrorMapper.toMessage(error))
-                    }
-            }
+            loginRepository.login(username, password)
+                .onSuccess { response ->
+                    log.d { "<< Login successful for user: ${response.user.username}" }
+                    tokenManager.saveToken(response.token)
+                    _uiState.value = LoginUiState.Success(response.user, response.token)
+                }
+                .onFailure { error ->
+                    log.e { "<< Login failed: ${error.message}" }
+                    _uiState.value = LoginUiState.Error(UiErrorMapper.toMessage(error))
+                }
         }
     }
 

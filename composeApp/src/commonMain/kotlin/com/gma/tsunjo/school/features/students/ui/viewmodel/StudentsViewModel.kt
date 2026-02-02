@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.gma.tsunjo.school.domain.exceptions.UiErrorMapper
 import com.gma.tsunjo.school.features.students.data.repository.StudentsRepository
 import com.gma.tsunjo.school.features.students.domain.model.Student
+import com.gma.tsunjo.school.features.students.domain.model.StudentProgressDetail
+import com.gma.tsunjo.school.features.students.domain.model.StudentWithLevel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +22,18 @@ sealed class StudentsUiState {
     data class Error(val message: String) : StudentsUiState()
 }
 
+sealed class ActiveStudentsUiState {
+    data object Loading : ActiveStudentsUiState()
+    data class Success(val students: List<StudentWithLevel>) : ActiveStudentsUiState()
+    data class Error(val message: String) : ActiveStudentsUiState()
+}
+
+sealed class StudentProgressDetailUiState {
+    data object Loading : StudentProgressDetailUiState()
+    data class Success(val detail: StudentProgressDetail) : StudentProgressDetailUiState()
+    data class Error(val message: String) : StudentProgressDetailUiState()
+}
+
 class StudentsViewModel(
     private val studentsRepository: StudentsRepository
 ) : ViewModel() {
@@ -27,14 +41,42 @@ class StudentsViewModel(
     private val _uiState = MutableStateFlow<StudentsUiState>(StudentsUiState.Loading)
     val uiState: StateFlow<StudentsUiState> = _uiState.asStateFlow()
 
+    private val _activeStudentsUiState = MutableStateFlow<ActiveStudentsUiState>(ActiveStudentsUiState.Loading)
+    val activeStudentsUiState: StateFlow<ActiveStudentsUiState> = _activeStudentsUiState.asStateFlow()
+
+    private val _studentProgressDetailUiState = MutableStateFlow<StudentProgressDetailUiState>(StudentProgressDetailUiState.Loading)
+    val studentProgressDetailUiState: StateFlow<StudentProgressDetailUiState> = _studentProgressDetailUiState.asStateFlow()
+
     private val _selectedStudents = MutableStateFlow<Set<String>>(emptySet())
     val selectedStudents: StateFlow<Set<String>> = _selectedStudents.asStateFlow()
 
-    init {
-        loadStudents()
+    fun loadActiveStudents() {
+        _activeStudentsUiState.value = ActiveStudentsUiState.Loading
+        viewModelScope.launch {
+            studentsRepository.getActiveStudents()
+                .onSuccess { students ->
+                    _activeStudentsUiState.value = ActiveStudentsUiState.Success(students)
+                }
+                .onFailure { error ->
+                    _activeStudentsUiState.value = ActiveStudentsUiState.Error(UiErrorMapper.toMessage(error))
+                }
+        }
     }
 
-    private fun loadStudents() {
+    fun loadStudentProgress(studentId: Long, studentName: String) {
+        _studentProgressDetailUiState.value = StudentProgressDetailUiState.Loading
+        viewModelScope.launch {
+            studentsRepository.getStudentProgress(studentId, studentName)
+                .onSuccess { detail ->
+                    _studentProgressDetailUiState.value = StudentProgressDetailUiState.Success(detail)
+                }
+                .onFailure { error ->
+                    _studentProgressDetailUiState.value = StudentProgressDetailUiState.Error(UiErrorMapper.toMessage(error))
+                }
+        }
+    }
+
+    private fun loadAllStudents() {
         viewModelScope.launch {
             studentsRepository.getStudents()
                 .onSuccess { students ->

@@ -4,6 +4,8 @@
 
 package com.gma.tsunjo.school.features.students.data.remote
 
+import com.gma.tsunjo.school.api.responses.StudentProgressByLevel
+import com.gma.tsunjo.school.api.responses.StudentWithLevelResponse
 import com.gma.tsunjo.school.data.remote.HttpErrorMapper
 import com.gma.tsunjo.school.features.students.domain.model.Student
 import io.ktor.client.HttpClient
@@ -17,6 +19,24 @@ class StudentsApi(
 ) {
     suspend fun getStudents(): List<Student> {
         val response = client.get("$endpoint/students")
+
+        return when {
+            response.status.isSuccess() -> response.body()
+            else -> throw HttpErrorMapper.mapError(response.status)
+        }
+    }
+
+    suspend fun getActiveStudents(): List<StudentWithLevelResponse> {
+        val response = client.get("$endpoint/students/active")
+
+        return when {
+            response.status.isSuccess() -> response.body()
+            else -> throw HttpErrorMapper.mapError(response.status)
+        }
+    }
+
+    suspend fun getStudentProgress(studentId: Long): StudentProgressByLevel {
+        val response = client.get("$endpoint/student-progress/student/$studentId")
 
         return when {
             response.status.isSuccess() -> response.body()

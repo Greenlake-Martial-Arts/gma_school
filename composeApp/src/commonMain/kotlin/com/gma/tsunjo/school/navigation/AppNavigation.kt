@@ -3,11 +3,15 @@
 package com.gma.tsunjo.school.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import co.touchlab.kermit.Logger
+import com.gma.tsunjo.school.auth.AuthenticationHandler
+import com.gma.tsunjo.school.auth.TokenManager
 import com.gma.tsunjo.school.features.attendance.ui.AttendanceDetailScreen
 import com.gma.tsunjo.school.features.attendance.ui.AttendanceScreen
 import com.gma.tsunjo.school.features.attendance.ui.NewAttendanceScreen
@@ -24,26 +28,49 @@ import org.koin.compose.koinInject
 fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
+    val log = Logger.withTag("AppNavigation")
     val studentsViewModel: StudentsViewModel = koinInject()
-    
+    val tokenManager: TokenManager = koinInject()
+    val authHandler: AuthenticationHandler = koinInject()
+
+    // Observe authentication failures
+    LaunchedEffect(Unit) {
+        authHandler.authenticationFailed.collect {
+            log.w { "<< Authentication failed, navigating to Login" }
+            navController.navigate(Screen.Login) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
+    // Check if user is already authenticated
+    val startDestination = if (tokenManager.isAuthenticated()) {
+        log.i { "<< User authenticated, starting at Home" }
+        Screen.Home
+    } else {
+        log.i { "<< User not authenticated, starting at Login" }
+        Screen.Login
+    }
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Login
+        startDestination = startDestination
     ) {
         composable<Screen.Login> {
             LoginScreen(
                 onLoginSuccess = {
+                    log.d { "<< Login successful, navigating to Home" }
                     navController.navigate(Screen.Home) {
                         popUpTo(Screen.Login) { inclusive = true }
                     }
                 }
             )
         }
-        
+
         composable<Screen.Dashboard> {
             DashboardScreen()
         }
-        
+
         composable<Screen.Home> {
             HomeScreen(
                 onNavigateToAttendance = {
@@ -69,7 +96,7 @@ fun AppNavigation(
                 }
             )
         }
-        
+
         composable<Screen.Attendance> {
             AttendanceScreen(
                 onNavigateToHome = {
@@ -100,7 +127,7 @@ fun AppNavigation(
                 }
             )
         }
-        
+
         composable<Screen.NewAttendance> {
             NewAttendanceScreen(
                 classTime = "6:00 PM Class",
@@ -109,7 +136,7 @@ fun AppNavigation(
                 }
             )
         }
-        
+
         composable<Screen.AttendanceDetail> { backStackEntry ->
             val detail = backStackEntry.toRoute<Screen.AttendanceDetail>()
             AttendanceDetailScreen(
@@ -121,7 +148,7 @@ fun AppNavigation(
                 }
             )
         }
-        
+
         composable<Screen.Progress> {
             StudentProgressScreen(
                 onNavigateToHome = {
@@ -149,7 +176,7 @@ fun AppNavigation(
                 }
             )
         }
-        
+
         composable<Screen.StudentProgressRecord> { backStackEntry ->
             val detail = backStackEntry.toRoute<Screen.StudentProgressRecord>()
             StudentProgressRecordScreen(
@@ -162,7 +189,7 @@ fun AppNavigation(
                 }
             )
         }
-        
+
         composable<Screen.Settings> {
             SettingsScreen(
                 onNavigateToHome = {
@@ -187,6 +214,7 @@ fun AppNavigation(
                 },
                 onLogout = {
                     studentsViewModel.clearSelection()
+                    log.i { "<< Navigating to Login after logout" }
                     navController.navigate(Screen.Login) {
                         popUpTo(0) { inclusive = true }
                     }

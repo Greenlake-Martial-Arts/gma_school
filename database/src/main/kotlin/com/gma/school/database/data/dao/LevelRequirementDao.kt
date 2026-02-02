@@ -2,7 +2,12 @@
 package com.gma.school.database.data.dao
 
 import com.gma.school.database.data.tables.LevelRequirementsTable
+import com.gma.school.database.data.tables.LevelsTable
+import com.gma.school.database.data.tables.MovesTable
+import com.gma.tsunjo.school.domain.models.Level
 import com.gma.tsunjo.school.domain.models.LevelRequirement
+import com.gma.tsunjo.school.domain.models.LevelRequirementWithDetails
+import com.gma.tsunjo.school.domain.models.Move
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -42,9 +47,22 @@ class LevelRequirementDao {
             ?.let(::toLevelRequirement)
     }
 
+    fun findByIdWithDetails(id: Long): LevelRequirementWithDetails? = transaction {
+        (LevelRequirementsTable innerJoin LevelsTable innerJoin MovesTable)
+            .select { LevelRequirementsTable.id eq id }
+            .singleOrNull()
+            ?.let(::toLevelRequirementWithDetails)
+    }
+
     fun findByLevel(levelId: Long): List<LevelRequirement> = transaction {
         LevelRequirementsTable.select { LevelRequirementsTable.levelId eq levelId }
             .map(::toLevelRequirement)
+    }
+
+    fun findByLevelWithDetails(levelId: Long): List<LevelRequirementWithDetails> = transaction {
+        (LevelRequirementsTable innerJoin LevelsTable innerJoin MovesTable)
+            .select { LevelRequirementsTable.levelId eq levelId }
+            .map(::toLevelRequirementWithDetails)
     }
 
     fun update(id: Long, sortOrder: Int, levelSpecificNotes: String?, isRequired: Boolean): Boolean = transaction {
@@ -63,6 +81,32 @@ class LevelRequirementDao {
         id = row[LevelRequirementsTable.id].value,
         levelId = row[LevelRequirementsTable.levelId],
         moveId = row[LevelRequirementsTable.moveId],
+        sortOrder = row[LevelRequirementsTable.sortOrder],
+        levelSpecificNotes = row[LevelRequirementsTable.levelSpecificNotes],
+        isRequired = row[LevelRequirementsTable.isRequired],
+        createdAt = row[LevelRequirementsTable.createdAt],
+        updatedAt = row[LevelRequirementsTable.updatedAt]
+    )
+
+    private fun toLevelRequirementWithDetails(row: ResultRow) = LevelRequirementWithDetails(
+        id = row[LevelRequirementsTable.id].value,
+        level = Level(
+            id = row[LevelsTable.id].value,
+            code = row[LevelsTable.code],
+            displayName = row[LevelsTable.displayName],
+            orderSeq = row[LevelsTable.orderSeq],
+            description = row[LevelsTable.description],
+            createdAt = row[LevelsTable.createdAt],
+            updatedAt = row[LevelsTable.updatedAt]
+        ),
+        move = Move(
+            id = row[MovesTable.id].value,
+            name = row[MovesTable.name],
+            description = row[MovesTable.description],
+            moveCategoryId = row[MovesTable.moveCategoriesId],
+            createdAt = row[MovesTable.createdAt],
+            updatedAt = row[MovesTable.updatedAt]
+        ),
         sortOrder = row[LevelRequirementsTable.sortOrder],
         levelSpecificNotes = row[LevelRequirementsTable.levelSpecificNotes],
         isRequired = row[LevelRequirementsTable.isRequired],

@@ -21,6 +21,7 @@ class StudentProgressRepositoryTest {
     private val levelDao = mockk<com.gma.school.database.data.dao.LevelDao>()
     private val moveDao = mockk<com.gma.school.database.data.dao.MoveDao>()
     private val studentDao = mockk<com.gma.school.database.data.dao.StudentDao>()
+    private val studentLevelDao = mockk<com.gma.school.database.data.dao.StudentLevelDao>()
     private val auditLogDao = mockk<com.gma.school.database.data.dao.AuditLogDao>(relaxed = true)
     private val repository = StudentProgressRepository(
         studentProgressDao,
@@ -28,6 +29,7 @@ class StudentProgressRepositoryTest {
         levelDao,
         moveDao,
         studentDao,
+        studentLevelDao,
         auditLogDao
     )
 
@@ -42,6 +44,42 @@ class StudentProgressRepositoryTest {
         notes = "Test progress",
         createdAt = LocalDateTime.parse("2025-01-01T00:00:00"),
         updatedAt = LocalDateTime.parse("2025-01-01T00:00:00")
+    )
+
+    private val testLevel = com.gma.tsunjo.school.domain.models.Level(
+        id = 1L,
+        code = "WHITE",
+        displayName = "White Belt",
+        orderSeq = 1,
+        description = "First level",
+        createdAt = LocalDateTime.parse("2025-01-01T00:00:00"),
+        updatedAt = LocalDateTime.parse("2025-01-01T00:00:00")
+    )
+
+    private val testMove = com.gma.tsunjo.school.domain.models.Move(
+        id = 1L,
+        name = "Test Move",
+        description = "Test",
+        moveCategoryId = 1L,
+        createdAt = LocalDateTime.parse("2025-01-01T00:00:00"),
+        updatedAt = LocalDateTime.parse("2025-01-01T00:00:00")
+    )
+
+    private val testLevelRequirement = com.gma.tsunjo.school.domain.models.LevelRequirement(
+        id = 1L,
+        levelId = 1L,
+        moveId = 1L,
+        sortOrder = 1,
+        levelSpecificNotes = null,
+        isRequired = true,
+        createdAt = LocalDateTime.parse("2025-01-01T00:00:00"),
+        updatedAt = LocalDateTime.parse("2025-01-01T00:00:00")
+    )
+
+    private val testStudentLevel = com.gma.tsunjo.school.domain.models.StudentLevel(
+        studentId = 1L,
+        levelId = 1L,
+        assignedAt = LocalDateTime.parse("2025-01-01T00:00:00")
     )
 
     @Test
@@ -95,22 +133,32 @@ class StudentProgressRepositoryTest {
     }
 
     @Test
-    fun `getProgressByStudent returns student progress list`() {
-        // Given
-        val progressList = listOf(testProgress)
-        every { studentProgressDao.findByStudent(1L) } returns progressList
-        every { levelRequirementDao.findById(any()) } returns null
-        every { levelDao.findById(any()) } returns null
-        every { moveDao.findById(any()) } returns null
-        every { studentDao.findById(any()) } returns null
+    fun `getProgressByStudent returns student progress for current level`() {
+        // Given - student has current level
+        every { studentLevelDao.findByStudent(1L) } returns testStudentLevel
+        every { levelDao.findById(1L) } returns testLevel
+        every { levelRequirementDao.findByLevel(1L) } returns listOf(testLevelRequirement)
+        every { studentProgressDao.findByStudent(1L) } returns listOf(testProgress)
+        every { moveDao.findById(1L) } returns testMove
 
         // When
         val result = repository.getProgressByStudent(1L)
 
         // Then
-        assertEquals(1, result.size)
-        assertEquals(testProgress.id, result[0].id)
-        verify { studentProgressDao.findByStudent(1L) }
+        assertNotNull(result)
+        assertEquals(testLevel.id, result?.level?.id)
+    }
+
+    @Test
+    fun `getProgressByStudent returns null when student has no level`() {
+        // Given
+        every { studentLevelDao.findByStudent(1L) } returns null
+
+        // When
+        val result = repository.getProgressByStudent(1L)
+
+        // Then
+        assertNull(result)
     }
 
     @Test
