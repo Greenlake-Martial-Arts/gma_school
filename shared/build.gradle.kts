@@ -40,6 +40,9 @@ kotlin {
             implementation(libs.ktor.client.contentNegotiation)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.serializationKotlinxJson)
+            implementation(libs.multiplatform.settings)
+            // Kermit Logging
+            implementation(libs.kermit)
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
