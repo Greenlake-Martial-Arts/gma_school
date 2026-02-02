@@ -4,19 +4,22 @@
 
 package com.gma.tsunjo.school.features.attendance.data.repository
 
+import com.gma.tsunjo.school.auth.AuthenticationHandler
 import com.gma.tsunjo.school.features.attendance.data.remote.AttendanceApi
 import com.gma.tsunjo.school.features.attendance.domain.model.AttendanceClass
 import com.gma.tsunjo.school.features.attendance.domain.model.AttendanceRecord
 import com.gma.tsunjo.school.features.attendance.domain.model.CreateAttendanceRequest
 
 class AttendanceRepository(
-    private val attendanceApi: AttendanceApi
+    private val attendanceApi: AttendanceApi,
+    private val authHandler: AuthenticationHandler
 ) {
     suspend fun getClassesForDate(date: String): Result<List<AttendanceClass>> {
         return try {
             val classes = attendanceApi.getClassesForDate(date)
             Result.success(classes)
         } catch (e: Exception) {
+            authHandler.handleError(e)
             Result.failure(e)
         }
     }
@@ -26,6 +29,7 @@ class AttendanceRepository(
             val record = attendanceApi.getAttendanceRecord(classId, date)
             Result.success(record)
         } catch (e: Exception) {
+            authHandler.handleError(e)
             Result.failure(e)
         }
     }
@@ -36,6 +40,7 @@ class AttendanceRepository(
             val record = attendanceApi.createAttendance(request)
             Result.success(record)
         } catch (e: Exception) {
+            authHandler.handleError(e)
             Result.failure(e)
         }
     }
@@ -45,6 +50,7 @@ class AttendanceRepository(
             val record = attendanceApi.updateAttendance(recordId, studentIds)
             Result.success(record)
         } catch (e: Exception) {
+            authHandler.handleError(e)
             Result.failure(e)
         }
     }

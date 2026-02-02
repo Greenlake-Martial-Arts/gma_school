@@ -37,6 +37,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,10 +51,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.gma.tsunjo.school.features.students.ui.viewmodel.StudentsViewModel
 import com.gma.tsunjo.school.theme.BlueSash
 import com.gma.tsunjo.school.theme.GMATheme
 import com.gma.tsunjo.school.ui.components.SearchableTopBar
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
 
 data class ProgressRecord(
     val technique: String,
@@ -79,47 +83,54 @@ fun StudentProgressRecordScreen(
     studentName: String,
     studentRank: String,
     studentRankColor: String,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    viewModel: StudentsViewModel = koinInject()
 ) {
-    val rankColor = when(studentRankColor) {
-        "White" -> com.gma.tsunjo.school.theme.WhiteSash
-        "Blue" -> BlueSash
-        "Green" -> com.gma.tsunjo.school.theme.GreenSash
-        "Brown" -> com.gma.tsunjo.school.theme.BrownSash
-        else -> com.gma.tsunjo.school.theme.BlackSash
+    val uiState by viewModel.studentProgressDetailUiState.collectAsState()
+    
+    LaunchedEffect(studentId) {
+        viewModel.loadStudentProgress(studentId.toLong(), studentName)
     }
     
-    var progressRecords by remember {
-        mutableStateOf(listOf(
-            ProgressRecord("Continous Punch Close", TechniqueStatus.MASTERED),
-            ProgressRecord("Palm Strikes", TechniqueStatus.NOT_STARTED),
-            ProgressRecord("Knee Strikes", TechniqueStatus.MASTERED),
-            ProgressRecord("Pak Sao", TechniqueStatus.NOT_STARTED),
-            ProgressRecord("Bong Sao", TechniqueStatus.MASTERED),
-            ProgressRecord("Taun Sao", TechniqueStatus.IN_PROGRESS),
-            ProgressRecord("Technical Standup", TechniqueStatus.IN_PROGRESS),
-            ProgressRecord("Bear Hug Escape #1", TechniqueStatus.NOT_STARTED)
-        ))
+    val rankColor = com.gma.tsunjo.school.theme.getLevelColor(studentRankColor)
+    
+    // Map API data to UI model
+    val progressRecords = when (uiState) {
+        is com.gma.tsunjo.school.features.students.ui.viewmodel.StudentProgressDetailUiState.Success -> {
+            (uiState as com.gma.tsunjo.school.features.students.ui.viewmodel.StudentProgressDetailUiState.Success).detail.requirements.map { req ->
+                ProgressRecord(
+                    technique = req.moveName,
+                    status = when (req.status) {
+                        com.gma.tsunjo.school.domain.models.ProgressState.NOT_STARTED -> TechniqueStatus.NOT_STARTED
+                        com.gma.tsunjo.school.domain.models.ProgressState.IN_PROGRESS -> TechniqueStatus.IN_PROGRESS
+                        com.gma.tsunjo.school.domain.models.ProgressState.PASSED -> TechniqueStatus.MASTERED
+                    },
+                    notes = req.notes ?: ""
+                )
+            }
+        }
+        else -> emptyList()
+    }
+    
+    var mutableProgressRecords by remember(progressRecords) {
+        mutableStateOf(progressRecords)
     }
     
     StudentProgressRecordView(
         studentName = studentName,
         studentRank = studentRank,
         studentRankColor = rankColor,
-        progressRecords = progressRecords,
+        progressRecords = mutableProgressRecords,
         onNavigateBack = onNavigateBack,
         onToggleTechnique = { technique ->
-            progressRecords = progressRecords.map {
+            mutableProgressRecords = mutableProgressRecords.map {
                 if (it.technique == technique) {
                     val currentStatus = it.status
                     val newStatus = if (currentStatus == TechniqueStatus.MASTERED) {
-                        // Long press on MASTERED resets to NOT_STARTED
                         TechniqueStatus.NOT_STARTED
                     } else {
-                        // Normal tap cycles through states
                         currentStatus.next()
                     }
-                    // Clear notes when moving away from IN_PROGRESS
                     if (newStatus != TechniqueStatus.IN_PROGRESS) {
                         it.copy(status = newStatus, notes = "")
                     } else {
@@ -129,7 +140,7 @@ fun StudentProgressRecordScreen(
             }
         },
         onNotesChange = { technique, newNotes ->
-            progressRecords = progressRecords.map {
+            mutableProgressRecords = mutableProgressRecords.map {
                 if (it.technique == technique) it.copy(notes = newNotes) else it
             }
         },
@@ -235,7 +246,7 @@ fun StudentProgressRecordView(
                                             text = studentRank.uppercase(),
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Bold,
-                                            color = if (studentRank.contains("White")) Color.Black else Color.White
+                                            color = if (studentRank.contains("White", ignoreCase = true)) Color.Black else Color.White
                                         )
                                     }
                                 }

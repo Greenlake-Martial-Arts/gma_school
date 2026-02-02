@@ -295,6 +295,19 @@ UI → Displays error message
 - ViewModels: `[Feature]ViewModel`
 - Previews: `[Feature]Preview`, `[Feature]PreviewLight`
 
+## Logging Standards
+
+**All log messages must use the `<< ` prefix format:**
+
+```kotlin
+log.d { "<< Debug message here" }
+log.i { "<< Info message here" }
+log.w { "<< Warning message here" }
+log.e { "<< Error message here" }
+```
+
+**Purpose:** The `<< ` prefix makes logs easily searchable and distinguishable from library logs.
+
 ## Before Making Changes
 
 1. Follow Screen → View → Preview pattern
@@ -303,3 +316,4 @@ UI → Displays error message
 4. Follow error handling flow (API → Repository → ViewModel → UI)
 5. Add both dark and light theme previews
 6. Use `ErrorMapper.toMessage()` for error messages
+7. Use `<< ` prefix for all log messages
