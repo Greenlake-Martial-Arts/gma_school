@@ -1,0 +1,47 @@
+@startuml
+!theme plain
+
+participant "User" as User
+participant "Client App" as Client
+participant "LoginViewModel" as VM
+participant "TokenManager" as TM
+participant "LoginRepository" as Repo
+participant "Auth API" as API
+participant "GMA Server" as Server
+participant "Database" as DB
+
+User -> Client: Enter credentials
+Client -> VM: login(username, password)
+VM -> Repo: login(username, password)
+Repo -> API: POST /auth/login
+API -> Server: HTTP Request
+Server -> DB: Validate credentials
+DB --> Server: User data
+Server -> Server: Generate JWT token
+Server --> API: LoginResponse(user, token)
+API --> Repo: LoginResponse
+Repo --> VM: Result.success(response)
+VM -> TM: saveToken(token)
+TM -> TM: Store in platform storage
+VM --> Client: LoginUiState.Success
+Client -> User: Navigate to Home
+
+note over TM: Token stored persistently
+
+User -> Client: Make API request
+Client -> Repo: getStudents()
+Repo -> API: GET /students
+API -> API: Prepare HTTP request
+TM -> API: getToken()
+API -> Server: HTTP Request + Authorization: Bearer {token}
+Server -> Server: Validate JWT
+Server -> DB: Query students
+DB --> Server: Student data
+Server --> API: Students list
+API --> Repo: Students
+Repo --> Client: Result.success(students)
+Client -> User: Display students
+
+note over User,Server: All subsequent API calls include token automatically
+
+@enduml
