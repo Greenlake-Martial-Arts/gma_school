@@ -6,14 +6,22 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8FB1024E2F3332B800CDA24E /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 8FB1024D2F3332B800CDA24E /* FirebaseAnalytics */; };
+		8FB102502F3332B800CDA24E /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 8FB1024F2F3332B800CDA24E /* FirebaseCrashlytics */; };
+		8FB102522F3332B800CDA24E /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 8FB102512F3332B800CDA24E /* FirebaseRemoteConfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
-		18209F791A61B55EEA858D87 /* gma_school.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gma_school.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		18209F791A61B55EEA858D87 /* Tsun Jo (Debug).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tsun Jo (Debug).app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8FB102652F33364200CDA24E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		D68E90C30514D2E6C30B98BB /* Exceptions for "iosApp" folder in "iosApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"GoogleService-Info-Debug.plist",
 				Info.plist,
 			);
 			target = F5038C090BAC93B4240285C8 /* iosApp */;
@@ -41,6 +49,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8FB102522F3332B800CDA24E /* FirebaseRemoteConfig in Frameworks */,
+				8FB1024E2F3332B800CDA24E /* FirebaseAnalytics in Frameworks */,
+				8FB102502F3332B800CDA24E /* FirebaseCrashlytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,13 +64,14 @@
 				74CE62092B972F78AF4B391B /* Configuration */,
 				0FA4C03F342EE91654313829 /* iosApp */,
 				A86DEB02D73F6D6164D51A2F /* Products */,
+				8FB102652F33364200CDA24E /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
 		A86DEB02D73F6D6164D51A2F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				18209F791A61B55EEA858D87 /* gma_school.app */,
+				18209F791A61B55EEA858D87 /* Tsun Jo (Debug).app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -72,6 +84,8 @@
 			buildConfigurationList = 21C8B39C2BC7F466579C1018 /* Build configuration list for PBXNativeTarget "iosApp" */;
 			buildPhases = (
 				F6030B7DE9816303566E25EB /* Compile Kotlin Framework */,
+				8FB102672F333D4E00CDA24E /* Firebase config Script */,
+				8F4086B22F40634900DD1194 /* Firebase Script */,
 				11AFB78760FC2BD6C40DE240 /* Sources */,
 				33035C36DBE6B82B13E667BB /* Frameworks */,
 				40A3279C6A10CC7D1FFB4B2A /* Resources */,
@@ -85,9 +99,12 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+				8FB1024D2F3332B800CDA24E /* FirebaseAnalytics */,
+				8FB1024F2F3332B800CDA24E /* FirebaseCrashlytics */,
+				8FB102512F3332B800CDA24E /* FirebaseRemoteConfig */,
 			);
 			productName = iosApp;
-			productReference = 18209F791A61B55EEA858D87 /* gma_school.app */;
+			productReference = 18209F791A61B55EEA858D87 /* Tsun Jo (Debug).app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -114,6 +131,9 @@
 			);
 			mainGroup = 3CFD7039D24BBAB8D908C050;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8FB1024C2F3332B700CDA24E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A86DEB02D73F6D6164D51A2F /* Products */;
 			projectDirPath = "";
@@ -135,6 +155,42 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		8F4086B22F40634900DD1194 /* Firebase Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Firebase Script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nbash\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+		8FB102672F333D4E00CDA24E /* Firebase config Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Firebase config Script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n#Select Firebase Config\n# Select the appropriate GoogleService-Info.plist based on configuration\nif [ \"${CONFIGURATION}\" == \"Debug\" ]; then\n    PLIST_SOURCE=\"${SRCROOT}/iosApp/GoogleService-Info-Debug.plist\"\nelse\n    PLIST_SOURCE=\"${SRCROOT}/iosApp/GoogleService-Info-Release.plist\"\nfi\n\nPLIST_DESTINATION=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n\nif [ -f \"$PLIST_SOURCE\" ]; then\n    cp \"$PLIST_SOURCE\" \"$PLIST_DESTINATION\"\n    echo \"✅ Copied ${CONFIGURATION} Firebase config\"\nelse\n    echo \"❌ Error: ${PLIST_SOURCE} not found\"\n    exit 1\nfi\n";
+		};
 		F6030B7DE9816303566E25EB /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -167,10 +223,39 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		0D6E6653C5F1B786C0877EFA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
+				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = iosApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		58ABC96A62D68F9324F7A3A2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = 74CE62092B972F78AF4B391B /* Configuration */;
-			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -235,7 +320,7 @@
 		658664588764B9D1B6C91336 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = 74CE62092B972F78AF4B391B /* Configuration */;
-			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			baseConfigurationReferenceRelativePath = Release.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -290,34 +375,6 @@
 			};
 			name = Release;
 		};
-		0D6E6653C5F1B786C0877EFA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = arm64;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "${TEAM_ID}";
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = iosApp/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
 		E526893A14BDE3CEBDEB9C7F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -349,15 +406,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		872F649676435F2D43850F90 /* Build configuration list for PBXProject "iosApp" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				58ABC96A62D68F9324F7A3A2 /* Debug */,
-				658664588764B9D1B6C91336 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		21C8B39C2BC7F466579C1018 /* Build configuration list for PBXNativeTarget "iosApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -367,7 +415,45 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		872F649676435F2D43850F90 /* Build configuration list for PBXProject "iosApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				58ABC96A62D68F9324F7A3A2 /* Debug */,
+				658664588764B9D1B6C91336 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8FB1024C2F3332B700CDA24E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.9.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8FB1024D2F3332B800CDA24E /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FB1024C2F3332B700CDA24E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		8FB1024F2F3332B800CDA24E /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FB1024C2F3332B700CDA24E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		8FB102512F3332B800CDA24E /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FB1024C2F3332B700CDA24E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 98C1AB24A9D146912C0424D2 /* Project object */;
 }

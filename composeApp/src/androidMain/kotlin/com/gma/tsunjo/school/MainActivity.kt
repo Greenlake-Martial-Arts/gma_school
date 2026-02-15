@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.gma.tsunjo.school.auth.initAndroidSettings
+import com.gma.tsunjo.school.firebase.FirebaseManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,6 +16,9 @@ class MainActivity : ComponentActivity() {
 
         // Initialize Android settings before Koin starts
         initAndroidSettings(applicationContext)
+        
+        // Initialize Firebase
+        FirebaseManager.initialize()
 
         setContent {
             App()

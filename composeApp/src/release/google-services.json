@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1087077979501",
+    "project_id": "gma-tsunjo",
+    "storage_bucket": "gma-tsunjo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1087077979501:android:a7103ae1bc118572003664",
+        "android_client_info": {
+          "package_name": "com.gma.tsunjo.school"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0TMyRHNYiTKn6w8qrjWcxTvgTjsmt-_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
