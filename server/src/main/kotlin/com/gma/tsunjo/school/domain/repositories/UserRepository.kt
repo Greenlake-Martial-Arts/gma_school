@@ -44,7 +44,7 @@ class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao)
                 Result.failure(AppException.DatabaseError("Failed to create user"))
             }
         } catch (e: AppException) {
-            Result.failure(HttpErrorMapper.mapException(e))
+            Result.failure(e)
         } catch (e: Exception) {
             Result.failure(AppException.DatabaseError("Database error during user creation", e))
         }
