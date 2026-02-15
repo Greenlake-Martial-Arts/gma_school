@@ -3,6 +3,7 @@
 package com.gma.tsunjo.school.domain.repositories
 
 import com.gma.school.database.data.dao.StudentProgressDao
+import com.gma.tsunjo.school.domain.models.ProgressState
 import com.gma.tsunjo.school.domain.models.StudentProgress
 import io.mockk.every
 import io.mockk.mockk
@@ -165,27 +166,27 @@ class StudentProgressRepositoryTest {
     fun `createProgress returns success when dao succeeds`() {
         // Given
         every {
-            studentProgressDao.create(1L, 1L, null, 0, "Test")
+            studentProgressDao.create(1L, 1L, ProgressState.IN_PROGRESS, null, 0, "Test")
         } returns testProgress
 
         // When
-        val result = repository.createProgress(1L, 1L, null, 0, "Test")
+        val result = repository.createProgress(1L, 1L, ProgressState.IN_PROGRESS, null, 0, "Test")
 
         // Then
         assertTrue(result.isSuccess)
         assertEquals(testProgress, result.getOrNull())
-        verify { studentProgressDao.create(1L, 1L, null, 0, "Test") }
+        verify { studentProgressDao.create(1L, 1L, ProgressState.IN_PROGRESS, null, 0, "Test") }
     }
 
     @Test
     fun `createProgress returns failure when dao throws exception`() {
         // Given
         every {
-            studentProgressDao.create(any(), any(), any(), any(), any())
+            studentProgressDao.create(any(), any(), any(), any(), any(), any())
         } throws RuntimeException("Database error")
 
         // When
-        val result = repository.createProgress(1L, 1L, null, 0, "Test")
+        val result = repository.createProgress(1L, 1L, ProgressState.IN_PROGRESS, null, 0, "Test")
 
         // Then
         assertTrue(result.isFailure)

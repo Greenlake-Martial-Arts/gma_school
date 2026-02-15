@@ -4,6 +4,7 @@ package com.gma.tsunjo.school.domain.repositories
 
 import com.gma.school.database.data.dao.RoleDao
 import com.gma.school.database.data.dao.UserDao
+import com.gma.tsunjo.school.data.remote.HttpErrorMapper
 import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.models.User
 import java.util.Base64
@@ -43,7 +44,7 @@ class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao)
                 Result.failure(AppException.DatabaseError("Failed to create user"))
             }
         } catch (e: AppException) {
-            Result.failure(e)
+            Result.failure(HttpErrorMapper.mapException(e))
         } catch (e: Exception) {
             Result.failure(AppException.DatabaseError("Database error during user creation", e))
         }
@@ -89,7 +90,7 @@ class UserRepository(private val userDao: UserDao, private val roleDao: RoleDao)
             if (user != null) {
                 Result.success(user)
             } else {
-                Result.failure(AppException.ValidationError("Invalid username or password"))
+                Result.failure(AppException.InvalidCredentials())
             }
         } catch (e: Exception) {
             Result.failure(AppException.DatabaseError("Authentication error", e))

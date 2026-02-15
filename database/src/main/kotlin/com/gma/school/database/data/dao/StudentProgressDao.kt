@@ -20,16 +20,19 @@ class StudentProgressDao {
     fun create(
         studentId: Long,
         levelRequirementId: Long,
+        status: ProgressState,
         instructorId: Long?,
         attempts: Int,
         notes: String?
     ): StudentProgress = transaction {
         val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+        val completedAt = if (status == ProgressState.PASSED) now else null
+        
         val id = StudentProgressTable.insertAndGetId {
             it[StudentProgressTable.studentId] = studentId
             it[StudentProgressTable.levelRequirementId] = levelRequirementId
-            it[StudentProgressTable.status] = ProgressState.NOT_STARTED.name
-            it[StudentProgressTable.completedAt] = null
+            it[StudentProgressTable.status] = status.name
+            it[StudentProgressTable.completedAt] = completedAt
             it[StudentProgressTable.instructorId] = instructorId
             it[StudentProgressTable.attempts] = attempts
             it[StudentProgressTable.notes] = notes
@@ -37,7 +40,7 @@ class StudentProgressDao {
             it[StudentProgressTable.updatedAt] = now
         }.value
 
-        StudentProgress(id, studentId, levelRequirementId, ProgressState.NOT_STARTED, null, instructorId, attempts, notes, now, now)
+        StudentProgress(id, studentId, levelRequirementId, status, completedAt, instructorId, attempts, notes, now, now)
     }
 
     fun findById(id: Long): StudentProgress? = transaction {

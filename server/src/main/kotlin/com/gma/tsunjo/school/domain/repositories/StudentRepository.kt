@@ -7,6 +7,7 @@ import com.gma.school.database.data.dao.MemberTypeDao
 import com.gma.school.database.data.dao.StudentDao
 import com.gma.school.database.data.dao.StudentLevelDao
 import com.gma.tsunjo.school.api.responses.StudentWithLevel
+import com.gma.tsunjo.school.data.remote.HttpErrorMapper
 import com.gma.tsunjo.school.domain.exceptions.AppException
 import com.gma.tsunjo.school.domain.models.Student
 import kotlinx.datetime.LocalDate
@@ -112,7 +113,7 @@ class StudentRepository(
 
             Result.success(student)
         } catch (e: AppException) {
-            Result.failure(e)
+            Result.failure(HttpErrorMapper.mapException(e))
         } catch (e: Exception) {
             Result.failure(AppException.DatabaseError("Database error during student creation", e))
         }

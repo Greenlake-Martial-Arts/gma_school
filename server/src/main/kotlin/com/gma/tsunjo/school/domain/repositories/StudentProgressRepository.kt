@@ -12,6 +12,7 @@ import com.gma.tsunjo.school.api.responses.RequirementProgress
 import com.gma.tsunjo.school.api.responses.StudentProgressByLevel
 import com.gma.tsunjo.school.api.responses.StudentProgressWithDetails
 import com.gma.tsunjo.school.domain.exceptions.AppException
+import com.gma.tsunjo.school.domain.models.ProgressState
 import com.gma.tsunjo.school.domain.models.StudentProgress
 
 class StudentProgressRepository(
@@ -49,7 +50,7 @@ class StudentProgressRepository(
                 levelSpecificNotes = req.levelSpecificNotes,
                 progress = com.gma.tsunjo.school.api.responses.ProgressStatus(
                     id = progress?.id,
-                    status = progress?.status ?: com.gma.tsunjo.school.domain.models.ProgressState.NOT_STARTED,
+                    status = progress?.status ?: ProgressState.NOT_STARTED,
                     completedAt = progress?.completedAt,
                     instructor = instructor,
                     attempts = progress?.attempts ?: 0,
@@ -107,13 +108,14 @@ class StudentProgressRepository(
     fun createProgress(
         studentId: Long,
         levelRequirementId: Long,
+        status: ProgressState,
         instructorId: Long?,
         attempts: Int = 0,
         notes: String?,
         userId: Long? = null
     ): Result<StudentProgress> {
         return try {
-            val progress = studentProgressDao.create(studentId, levelRequirementId, instructorId, attempts, notes)
+            val progress = studentProgressDao.create(studentId, levelRequirementId, status, instructorId, attempts, notes)
 
             userId?.let {
                 auditLogDao.create(
@@ -121,7 +123,7 @@ class StudentProgressRepository(
                     action = "CREATE",
                     entity = "student_progress",
                     entityId = progress.id,
-                    description = "Created progress for student $studentId on requirement $levelRequirementId",
+                    description = "Created progress for student $studentId on requirement $levelRequirementId with status $status",
                     userAgent = null
                 )
             }
@@ -134,7 +136,7 @@ class StudentProgressRepository(
 
     fun updateProgress(
         id: Long,
-        status: com.gma.tsunjo.school.domain.models.ProgressState?,
+        status: ProgressState?,
         instructorId: Long?,
         attempts: Int?,
         notes: String?,
@@ -149,7 +151,7 @@ class StudentProgressRepository(
         }
 
         if (result && userId != null) {
-            val action = if (status == com.gma.tsunjo.school.domain.models.ProgressState.PASSED) "MARK_COMPLETED" else "UPDATE_STATUS"
+            val action = if (status == ProgressState.PASSED) "MARK_COMPLETED" else "UPDATE_STATUS"
             auditLogDao.create(
                 userId = userId,
                 action = action,
@@ -165,7 +167,7 @@ class StudentProgressRepository(
 
     fun bulkUpdateProgress(
         progressIds: List<Long>,
-        status: com.gma.tsunjo.school.domain.models.ProgressState?,
+        status: ProgressState?,
         instructorId: Long?,
         attempts: Int?,
         notes: String?,

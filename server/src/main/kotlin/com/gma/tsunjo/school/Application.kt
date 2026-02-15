@@ -59,7 +59,9 @@ fun Application.configurePlugins() {
     install(CORS) {
         // FIXME: Remove this or upload to the same server
         allowHost("localhost:8081")
+        allowHost("localhost:8082")
         allowHost("127.0.0.1:8081")
+        allowHost("127.0.0.1:8082")
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
