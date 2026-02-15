@@ -4,10 +4,10 @@
 
 package com.gma.tsunjo.school.features.attendance.data.remote
 
+import com.gma.tsunjo.school.api.requests.CreateAttendanceRequest
+import com.gma.tsunjo.school.api.responses.AttendanceWithStudents
 import com.gma.tsunjo.school.data.remote.HttpErrorMapper
-import com.gma.tsunjo.school.features.attendance.domain.model.AttendanceClass
-import com.gma.tsunjo.school.features.attendance.domain.model.AttendanceRecord
-import com.gma.tsunjo.school.features.attendance.domain.model.CreateAttendanceRequest
+import com.gma.tsunjo.school.domain.models.Attendance
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -21,8 +21,8 @@ class AttendanceApi(
     private val client: HttpClient,
     private val endpoint: String
 ) {
-    suspend fun getClassesForDate(date: String): List<AttendanceClass> {
-        val response = client.get("$endpoint/attendance/classes?date=$date")
+    suspend fun getAttendancesByDateRange(startDate: String, endDate: String): List<Attendance> {
+        val response = client.get("$endpoint/attendance/date-range?startDate=$startDate&endDate=$endDate")
 
         return when {
             response.status.isSuccess() -> response.body()
@@ -30,8 +30,8 @@ class AttendanceApi(
         }
     }
 
-    suspend fun getAttendanceRecord(classId: String, date: String): AttendanceRecord {
-        val response = client.get("$endpoint/attendance/record?classId=$classId&date=$date")
+    suspend fun getAttendanceWithStudents(attendanceId: Long): AttendanceWithStudents {
+        val response = client.get("$endpoint/attendance/$attendanceId/with-students")
 
         return when {
             response.status.isSuccess() -> response.body()
@@ -39,7 +39,7 @@ class AttendanceApi(
         }
     }
 
-    suspend fun createAttendance(request: CreateAttendanceRequest): AttendanceRecord {
+    suspend fun createAttendance(request: CreateAttendanceRequest): Attendance {
         val response = client.post("$endpoint/attendance") {
             contentType(ContentType.Application.Json)
             setBody(request)
@@ -51,15 +51,14 @@ class AttendanceApi(
         }
     }
 
-    suspend fun updateAttendance(recordId: String, studentIds: List<String>): AttendanceRecord {
-        val response = client.post("$endpoint/attendance/$recordId") {
+    suspend fun addStudentsToAttendance(attendanceId: Long, studentIds: List<Long>) {
+        val response = client.post("$endpoint/attendance/$attendanceId/students/bulk") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("studentIds" to studentIds))
         }
 
-        return when {
-            response.status.isSuccess() -> response.body()
-            else -> throw HttpErrorMapper.mapError(response.status)
+        if (!response.status.isSuccess()) {
+            throw HttpErrorMapper.mapError(response.status)
         }
     }
 }

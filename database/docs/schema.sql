@@ -79,7 +79,7 @@ CREATE TABLE students (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE levels (
-    id           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT ' Levels (belts/ranks)',
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT ' Levels (sash/ranks)',
     code         VARCHAR(20) NOT NULL UNIQUE,
     display_name VARCHAR(50) NOT NULL,
     order_seq    INT NOT NULL,

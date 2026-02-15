@@ -56,32 +56,44 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AttendanceDetailScreen(
-    classId: String,
+    attendanceId: Long,
     className: String,
-    date: String,
     onNavigateBack: () -> Unit,
     studentsViewModel: StudentsViewModel = koinViewModel(),
     attendanceViewModel: AttendanceViewModel = koinViewModel()
 ) {
-    val studentsUiState by studentsViewModel.uiState.collectAsState()
+    val activeStudentsUiState by studentsViewModel.activeStudentsUiState.collectAsState()
     val detailUiState by attendanceViewModel.detailUiState.collectAsState()
     val selectedStudents by studentsViewModel.selectedStudents.collectAsState()
 
     LaunchedEffect(Unit) {
-        attendanceViewModel.loadAttendanceRecord(classId, date)
+        studentsViewModel.loadActiveStudents()
+    }
+
+    LaunchedEffect(attendanceId) {
+        attendanceViewModel.loadAttendanceDetail(attendanceId)
     }
 
     LaunchedEffect(detailUiState) {
         if (detailUiState is AttendanceDetailUiState.Success) {
-            val record = (detailUiState as AttendanceDetailUiState.Success).record
-            record.studentIds.forEach { studentId ->
-                studentsViewModel.toggleStudent(studentId)
+            val attendance = (detailUiState as AttendanceDetailUiState.Success).attendance
+            studentsViewModel.clearSelection()
+            attendance.students.forEach { student ->
+                studentsViewModel.toggleStudent(student.id.toString())
             }
         }
     }
 
-    val students = when (studentsUiState) {
-        is StudentsUiState.Success -> (studentsUiState as StudentsUiState.Success).students
+    val students = when (activeStudentsUiState) {
+        is com.gma.tsunjo.school.features.students.ui.viewmodel.ActiveStudentsUiState.Success -> 
+            (activeStudentsUiState as com.gma.tsunjo.school.features.students.ui.viewmodel.ActiveStudentsUiState.Success).students.map {
+                com.gma.tsunjo.school.features.students.domain.model.Student(
+                    id = it.id.toString(),
+                    name = it.fullName,
+                    rankBadge = it.currentLevel,
+                    rankColor = it.code
+                )
+            }
         else -> emptyList()
     }
 
@@ -89,14 +101,12 @@ fun AttendanceDetailScreen(
         className = className,
         students = students,
         selectedStudents = selectedStudents,
-        isLoading = studentsUiState is StudentsUiState.Loading || detailUiState is AttendanceDetailUiState.Loading,
+        isLoading = activeStudentsUiState is com.gma.tsunjo.school.features.students.ui.viewmodel.ActiveStudentsUiState.Loading || detailUiState is AttendanceDetailUiState.Loading,
         onNavigateBack = onNavigateBack,
         onStudentToggle = { studentsViewModel.toggleStudent(it) },
         onSaveAttendance = {
-            if (detailUiState is AttendanceDetailUiState.Success) {
-                val record = (detailUiState as AttendanceDetailUiState.Success).record
-                attendanceViewModel.updateAttendance(record.id, selectedStudents.toList())
-            }
+            val studentIds = selectedStudents.map { it.toLong() }
+            attendanceViewModel.addStudentsToAttendance(attendanceId, studentIds)
         }
     )
 }

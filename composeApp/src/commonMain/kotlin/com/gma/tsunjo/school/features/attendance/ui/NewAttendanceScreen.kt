@@ -47,21 +47,37 @@ import com.gma.tsunjo.school.theme.WhiteSash
 import com.gma.tsunjo.school.ui.components.SearchableTopBar
 import com.gma.tsunjo.school.ui.components.StudentItem
 import com.gma.tsunjo.school.ui.components.StudentSelectionList
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewAttendanceScreen(
     classTime: String,
     onNavigateBack: () -> Unit,
-    viewModel: StudentsViewModel = koinViewModel()
+    studentsViewModel: StudentsViewModel = koinViewModel(),
+    attendanceViewModel: com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceViewModel = koinViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val selectedStudents by viewModel.selectedStudents.collectAsState()
+    val activeStudentsUiState by studentsViewModel.activeStudentsUiState.collectAsState()
+    val selectedStudents by studentsViewModel.selectedStudents.collectAsState()
 
-    val students = when (uiState) {
-        is StudentsUiState.Success -> (uiState as StudentsUiState.Success).students
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        studentsViewModel.loadActiveStudents()
+    }
+
+    val students = when (activeStudentsUiState) {
+        is com.gma.tsunjo.school.features.students.ui.viewmodel.ActiveStudentsUiState.Success -> 
+            (activeStudentsUiState as com.gma.tsunjo.school.features.students.ui.viewmodel.ActiveStudentsUiState.Success).students.map {
+                com.gma.tsunjo.school.ui.components.StudentItem(
+                    id = it.id.toString(),
+                    name = it.fullName,
+                    rankBadge = it.currentLevel,
+                    rankColor = com.gma.tsunjo.school.theme.getLevelColor(it.code),
+                    isSelected = false
+                )
+            }
         else -> emptyList()
     }
 
@@ -69,10 +85,15 @@ fun NewAttendanceScreen(
         classTime = classTime,
         students = students,
         selectedStudents = selectedStudents,
-        isLoading = uiState is StudentsUiState.Loading,
+        isLoading = activeStudentsUiState is com.gma.tsunjo.school.features.students.ui.viewmodel.ActiveStudentsUiState.Loading,
         onNavigateBack = onNavigateBack,
-        onStudentToggle = { viewModel.toggleStudent(it) },
-        onSaveAttendance = { /* TODO: Save attendance */ }
+        onStudentToggle = { studentsViewModel.toggleStudent(it) },
+        onSaveAttendance = {
+            val studentIds = selectedStudents.map { it.toLong() }
+            attendanceViewModel.createAttendanceForToday(classTime, studentIds) {
+                onNavigateBack()
+            }
+        }
     )
 }
 
@@ -80,7 +101,7 @@ fun NewAttendanceScreen(
 @Composable
 fun NewAttendanceView(
     classTime: String,
-    students: List<com.gma.tsunjo.school.features.students.domain.model.Student>,
+    students: List<com.gma.tsunjo.school.ui.components.StudentItem>,
     selectedStudents: Set<String>,
     isLoading: Boolean,
     onNavigateBack: () -> Unit,
@@ -138,13 +159,7 @@ fun NewAttendanceView(
                 }
                 else -> {
                     val studentItems = filteredStudents.map { student ->
-                        StudentItem(
-                            id = student.id,
-                            name = student.name,
-                            rankBadge = student.rankBadge,
-                            rankColor = getRankColor(student.rankColor),
-                            isSelected = selectedStudents.contains(student.id)
-                        )
+                        student.copy(isSelected = selectedStudents.contains(student.id))
                     }
 
                     Column(
@@ -246,9 +261,9 @@ private fun NewAttendancePreviewContent() {
     NewAttendanceView(
         classTime = "6:00 PM Class",
         students = listOf(
-            com.gma.tsunjo.school.features.students.domain.model.Student("1", "John Doe", "White Sash", "White"),
-            com.gma.tsunjo.school.features.students.domain.model.Student("2", "Jane Smith", "Blue Sash", "Blue"),
-            com.gma.tsunjo.school.features.students.domain.model.Student("3", "Bob Johnson", "Green Sash", "Green")
+            com.gma.tsunjo.school.ui.components.StudentItem("1", "John Doe", "White Sash", WhiteSash),
+            com.gma.tsunjo.school.ui.components.StudentItem("2", "Jane Smith", "Blue Sash", BlueSash),
+            com.gma.tsunjo.school.ui.components.StudentItem("3", "Bob Johnson", "Green Sash", GreenSash)
         ),
         isLoading = false,
         selectedStudents = setOf("2"),

@@ -9,6 +9,7 @@ import com.gma.tsunjo.school.api.responses.UserInfo
 import com.gma.tsunjo.school.auth.TokenManager
 import com.gma.tsunjo.school.data.repository.LoginRepository
 import com.gma.tsunjo.school.domain.exceptions.UiErrorMapper
+import com.gma.tsunjo.school.domain.exceptions.logToFirebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,6 +43,7 @@ class LoginViewModel(
                 }
                 .onFailure { error ->
                     log.e { "<< Login failed: ${error.message}" }
+                    error.logToFirebase()
                     _uiState.value = LoginUiState.Error(UiErrorMapper.toMessage(error))
                 }
         }

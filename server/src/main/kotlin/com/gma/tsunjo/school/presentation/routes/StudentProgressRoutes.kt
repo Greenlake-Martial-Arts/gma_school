@@ -136,6 +136,7 @@ fun Route.createStudentProgress(logger: Logger, studentProgressRepository: Stude
             val result = studentProgressRepository.createProgress(
                 studentId = request.studentId,
                 levelRequirementId = request.levelRequirementId,
+                status = request.status,
                 instructorId = request.instructorId,
                 attempts = request.attempts,
                 notes = request.notes

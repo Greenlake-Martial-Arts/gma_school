@@ -39,6 +39,7 @@ class StudentProgressRoutesIntegrationTest : BaseIntegrationTest() {
         val createRequest = CreateStudentProgressRequest(
             studentId = 1,
             levelRequirementId = 1,
+            status = com.gma.tsunjo.school.domain.models.ProgressState.IN_PROGRESS,
             instructorId = null,
             attempts = 0,
             notes = "Test progress"
@@ -94,6 +95,7 @@ class StudentProgressRoutesIntegrationTest : BaseIntegrationTest() {
         val request = CreateStudentProgressRequest(
             studentId = 1,
             levelRequirementId = 1,
+            status = com.gma.tsunjo.school.domain.models.ProgressState.IN_PROGRESS,
             instructorId = null,
             attempts = 0,
             notes = "Test progress"

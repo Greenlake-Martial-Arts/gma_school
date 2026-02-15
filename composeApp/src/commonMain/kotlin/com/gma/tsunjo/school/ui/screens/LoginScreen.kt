@@ -205,7 +205,7 @@ fun LoginView(
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
-                    onDone = { focusManager.clearFocus() }
+                    onDone = { onLoginClick(email, password) }
                 ),
                 singleLine = true,
                 enabled = uiState !is LoginUiState.Loading,

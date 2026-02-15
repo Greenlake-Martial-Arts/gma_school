@@ -119,11 +119,11 @@ fun AppNavigation(
                         restoreState = true
                     }
                 },
-                onNavigateToNewAttendance = { classTime ->
+                onNavigateToNewAttendance = {
                     navController.navigate(Screen.NewAttendance)
                 },
-                onNavigateToAttendanceDetail = { classId, className, date ->
-                    navController.navigate(Screen.AttendanceDetail(classId, className, date))
+                onNavigateToAttendanceDetail = { attendanceId, className ->
+                    navController.navigate(Screen.AttendanceDetail(attendanceId, className))
                 }
             )
         }
@@ -140,9 +140,8 @@ fun AppNavigation(
         composable<Screen.AttendanceDetail> { backStackEntry ->
             val detail = backStackEntry.toRoute<Screen.AttendanceDetail>()
             AttendanceDetailScreen(
-                classId = detail.classId,
+                attendanceId = detail.attendanceId,
                 className = detail.className,
-                date = detail.date,
                 onNavigateBack = {
                     navController.popBackStack()
                 }

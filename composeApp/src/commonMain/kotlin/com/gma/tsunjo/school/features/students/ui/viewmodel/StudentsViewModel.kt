@@ -7,6 +7,7 @@ package com.gma.tsunjo.school.features.students.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gma.tsunjo.school.domain.exceptions.UiErrorMapper
+import com.gma.tsunjo.school.domain.exceptions.logToFirebase
 import com.gma.tsunjo.school.features.students.data.repository.StudentsRepository
 import com.gma.tsunjo.school.features.students.domain.model.Student
 import com.gma.tsunjo.school.features.students.domain.model.StudentProgressDetail
@@ -58,6 +59,7 @@ class StudentsViewModel(
                     _activeStudentsUiState.value = ActiveStudentsUiState.Success(students)
                 }
                 .onFailure { error ->
+                    error.logToFirebase()
                     _activeStudentsUiState.value = ActiveStudentsUiState.Error(UiErrorMapper.toMessage(error))
                 }
         }
@@ -71,8 +73,50 @@ class StudentsViewModel(
                     _studentProgressDetailUiState.value = StudentProgressDetailUiState.Success(detail)
                 }
                 .onFailure { error ->
+                    error.logToFirebase()
                     _studentProgressDetailUiState.value = StudentProgressDetailUiState.Error(UiErrorMapper.toMessage(error))
                 }
+        }
+    }
+
+    fun createStudentProgress(
+        studentId: Long,
+        levelRequirementId: Long,
+        status: com.gma.tsunjo.school.domain.models.ProgressState,
+        notes: String?
+    ) {
+        viewModelScope.launch {
+            studentsRepository.createStudentProgress(
+                studentId = studentId,
+                levelRequirementId = levelRequirementId,
+                status = status,
+                notes = notes
+            ).onSuccess {
+                loadStudentProgress(studentId, "")
+            }.onFailure { error ->
+                error.logToFirebase()
+                _studentProgressDetailUiState.value = StudentProgressDetailUiState.Error(UiErrorMapper.toMessage(error))
+            }
+        }
+    }
+
+    fun updateStudentProgress(
+        studentId: Long,
+        progressId: Long,
+        status: com.gma.tsunjo.school.domain.models.ProgressState,
+        notes: String?
+    ) {
+        viewModelScope.launch {
+            studentsRepository.updateStudentProgress(
+                progressId = progressId,
+                status = status,
+                notes = notes
+            ).onSuccess {
+                loadStudentProgress(studentId, "")
+            }.onFailure { error ->
+                error.logToFirebase()
+                _studentProgressDetailUiState.value = StudentProgressDetailUiState.Error(UiErrorMapper.toMessage(error))
+            }
         }
     }
 
@@ -83,6 +127,7 @@ class StudentsViewModel(
                     _uiState.value = StudentsUiState.Success(students)
                 }
                 .onFailure { error ->
+                    error.logToFirebase()
                     _uiState.value = StudentsUiState.Error(UiErrorMapper.toMessage(error))
                 }
         }

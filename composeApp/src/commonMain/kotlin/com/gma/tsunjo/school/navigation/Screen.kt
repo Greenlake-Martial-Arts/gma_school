@@ -36,8 +36,7 @@ sealed interface Screen {
     
     @Serializable
     data class AttendanceDetail(
-        val classId: String,
-        val className: String,
-        val date: String
+        val attendanceId: Long,
+        val className: String
     ) : Screen
 }

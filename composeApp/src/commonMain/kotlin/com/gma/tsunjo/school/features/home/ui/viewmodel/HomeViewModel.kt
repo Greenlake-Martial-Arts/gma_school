@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gma.tsunjo.school.features.home.data.repository.HomeRepository
 import com.gma.tsunjo.school.domain.exceptions.UiErrorMapper
+import com.gma.tsunjo.school.domain.exceptions.logToFirebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,6 +65,7 @@ class HomeViewModel(
                     )
                 }
                 .onFailure { error ->
+                    error.logToFirebase()
                     _uiState.value = HomeUiState.Error(UiErrorMapper.toMessage(error))
                 }
         }
