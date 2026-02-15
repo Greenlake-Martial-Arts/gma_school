@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -59,6 +60,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 
 data class ProgressRecord(
+    val levelRequirementId: Long,
+    val progressId: Long?,
     val technique: String,
     val status: TechniqueStatus,
     val notes: String = ""
@@ -99,6 +102,8 @@ fun StudentProgressRecordScreen(
         is com.gma.tsunjo.school.features.students.ui.viewmodel.StudentProgressDetailUiState.Success -> {
             (uiState as com.gma.tsunjo.school.features.students.ui.viewmodel.StudentProgressDetailUiState.Success).detail.requirements.map { req ->
                 ProgressRecord(
+                    levelRequirementId = req.levelRequirementId,
+                    progressId = req.progressId,
                     technique = req.moveName,
                     status = when (req.status) {
                         com.gma.tsunjo.school.domain.models.ProgressState.NOT_STARTED -> TechniqueStatus.NOT_STARTED
@@ -144,7 +149,33 @@ fun StudentProgressRecordScreen(
                 if (it.technique == technique) it.copy(notes = newNotes) else it
             }
         },
-        onSaveProgress = {}
+        onSaveProgress = {
+            mutableProgressRecords.forEach { record ->
+                val apiStatus = when (record.status) {
+                    TechniqueStatus.NOT_STARTED -> com.gma.tsunjo.school.domain.models.ProgressState.NOT_STARTED
+                    TechniqueStatus.IN_PROGRESS -> com.gma.tsunjo.school.domain.models.ProgressState.IN_PROGRESS
+                    TechniqueStatus.MASTERED -> com.gma.tsunjo.school.domain.models.ProgressState.PASSED
+                }
+                
+                if (record.progressId == null) {
+                    if (record.status != TechniqueStatus.NOT_STARTED) {
+                        viewModel.createStudentProgress(
+                            studentId = studentId.toLong(),
+                            levelRequirementId = record.levelRequirementId,
+                            status = apiStatus,
+                            notes = record.notes.ifBlank { null }
+                        )
+                    }
+                } else {
+                    viewModel.updateStudentProgress(
+                        studentId = studentId.toLong(),
+                        progressId = record.progressId,
+                        status = apiStatus,
+                        notes = record.notes.ifBlank { null }
+                    )
+                }
+            }
+        }
     )
 }
 
@@ -328,7 +359,7 @@ fun StudentProgressRecordView(
                                         .background(Color.Gray)
                                 )
                                 Text(
-                                    text = "Not Started",
+                                    text = com.gma.tsunjo.school.resources.Strings.PROGRESS_NOT_STARTED,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -344,7 +375,7 @@ fun StudentProgressRecordView(
                                         .background(Color(0xFF2196F3)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text("•••", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                    DrawDotsInProgress()
                                 }
                                 Text(
                                     text = "In Progress",
@@ -364,16 +395,21 @@ fun StudentProgressRecordView(
                                     contentAlignment = Alignment.TopCenter,
 
                                 ) {
-                                    Text(
-                                        text = "✓",
-                                        color = Color.White,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(bottom = 2.dp)
-                                    )
+                                    Canvas(modifier = Modifier.size(14.dp)) {
+                                        val path = androidx.compose.ui.graphics.Path().apply {
+                                            moveTo(size.width * 0.2f, size.height * 0.5f)
+                                            lineTo(size.width * 0.4f, size.height * 0.7f)
+                                            lineTo(size.width * 0.8f, size.height * 0.3f)
+                                        }
+                                        drawPath(
+                                            path = path,
+                                            color = androidx.compose.ui.graphics.Color.White,
+                                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
+                                        )
+                                    }
                                 }
                                 Text(
-                                    text = "Mastered",
+                                    text = com.gma.tsunjo.school.resources.Strings.PROGRESS_MASTERED,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -542,14 +578,6 @@ fun TechniqueItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Lock icon for mastered
-                if (status == TechniqueStatus.MASTERED) {
-                    Text(
-                        text = "🔒",
-                        fontSize = 16.sp
-                    )
-                }
-                
                 // Status Icon
                 Box(
                     modifier = Modifier
@@ -566,10 +594,23 @@ fun TechniqueItem(
             ) {
                 when (status) {
                     TechniqueStatus.MASTERED -> {
-                        Text("✓", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        // Checkmark using Canvas
+                        Canvas(modifier = Modifier.size(16.dp)) {
+                            val path = androidx.compose.ui.graphics.Path().apply {
+                                moveTo(size.width * 0.2f, size.height * 0.5f)
+                                lineTo(size.width * 0.4f, size.height * 0.7f)
+                                lineTo(size.width * 0.8f, size.height * 0.3f)
+                            }
+                            drawPath(
+                                path = path,
+                                color = androidx.compose.ui.graphics.Color.White,
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f)
+                            )
+                        }
                     }
                     TechniqueStatus.IN_PROGRESS -> {
-                        Text("•••", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        // Three dots using Canvas
+                        DrawDotsInProgress()
                     }
                     TechniqueStatus.NOT_STARTED -> {
                         // Empty circle
@@ -608,10 +649,33 @@ fun TechniqueItem(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "📝",
-                                fontSize = 14.sp
-                            )
+                            // Notes icon using Canvas
+                            Canvas(modifier = Modifier.size(14.dp)) {
+                                // Draw paper outline
+                                val rect = androidx.compose.ui.geometry.Rect(
+                                    left = size.width * 0.1f,
+                                    top = 0f,
+                                    right = size.width * 0.9f,
+                                    bottom = size.height * 0.9f
+                                )
+                                drawRoundRect(
+                                    color = androidx.compose.ui.graphics.Color.Gray,
+                                    topLeft = rect.topLeft,
+                                    size = rect.size,
+                                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(2f, 2f),
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5f)
+                                )
+                                // Draw lines
+                                val lineSpacing = size.height * 0.25f
+                                for (i in 1..3) {
+                                    drawLine(
+                                        color = androidx.compose.ui.graphics.Color.Gray,
+                                        start = androidx.compose.ui.geometry.Offset(size.width * 0.25f, lineSpacing * i),
+                                        end = androidx.compose.ui.geometry.Offset(size.width * 0.75f, lineSpacing * i),
+                                        strokeWidth = 1f
+                                    )
+                                }
+                            }
                             Text(
                                 text = "Notes:",
                                 style = MaterialTheme.typography.labelMedium,
@@ -706,20 +770,43 @@ fun TechniqueItem(
 }
 
 @Composable
+private fun DrawDotsInProgress() {
+    Canvas(modifier = Modifier.size(16.dp)) {
+        val dotRadius = 2f
+        val spacing = size.width / 4
+        drawCircle(
+            color = Color.White,
+            radius = dotRadius,
+            center = Offset(spacing, size.height / 2)
+        )
+        drawCircle(
+            color = Color.White,
+            radius = dotRadius,
+            center = androidx.compose.ui.geometry.Offset(size.width / 2, size.height / 2)
+        )
+        drawCircle(
+            color = Color.White,
+            radius = dotRadius,
+            center = androidx.compose.ui.geometry.Offset(size.width - spacing, size.height / 2)
+        )
+    }
+}
+
+@Composable
 private fun StudentProgressRecordPreviewContent() {
     StudentProgressRecordView(
         studentName = "John Doe",
         studentRank = "Blue Sash",
         studentRankColor = BlueSash,
         progressRecords = listOf(
-            ProgressRecord("Front Kick", TechniqueStatus.MASTERED),
-            ProgressRecord("Side Kick", TechniqueStatus.NOT_STARTED),
-            ProgressRecord("Hook Kick", TechniqueStatus.IN_PROGRESS, "Needs to work on hip rotation"),
-            ProgressRecord("Roundhouse Kick", TechniqueStatus.MASTERED),
-            ProgressRecord("Back Kick", TechniqueStatus.IN_PROGRESS, notes = "Maintain a slight bend in your elbow. The power comes from the hip rotation, not just the arm swing."),
-            ProgressRecord("Axe Kick", TechniqueStatus.MASTERED),
-            ProgressRecord("Spinning Kick", TechniqueStatus.IN_PROGRESS, "Practice balance and follow-through"),
-            ProgressRecord("Bear Hug Escape #1 ", TechniqueStatus.NOT_STARTED)
+            ProgressRecord(1L, null, "Front Kick", TechniqueStatus.MASTERED),
+            ProgressRecord(2L, null, "Side Kick", TechniqueStatus.NOT_STARTED),
+            ProgressRecord(3L, null, "Hook Kick", TechniqueStatus.IN_PROGRESS, "Needs to work on hip rotation"),
+            ProgressRecord(4L, null, "Roundhouse Kick", TechniqueStatus.MASTERED),
+            ProgressRecord(5L, null, "Back Kick", TechniqueStatus.IN_PROGRESS, notes = "Maintain a slight bend in your elbow. The power comes from the hip rotation, not just the arm swing."),
+            ProgressRecord(6L, null, "Axe Kick", TechniqueStatus.MASTERED),
+            ProgressRecord(2L, null, "Spinning Kick", TechniqueStatus.IN_PROGRESS, "Practice balance and follow-through"),
+            ProgressRecord(3L, null, "Bear Hug Escape #1 ", TechniqueStatus.NOT_STARTED)
         ),
         onNavigateBack = {},
         onToggleTechnique = {},

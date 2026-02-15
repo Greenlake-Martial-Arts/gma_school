@@ -45,14 +45,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.gma.tsunjo.school.features.attendance.domain.model.AttendanceClass
-import com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceUiState
 import com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceViewModel
 import com.gma.tsunjo.school.theme.GMATheme
 import com.gma.tsunjo.school.ui.components.BottomNavigationBar
 import com.gma.tsunjo.school.ui.components.SearchableTopBar
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,39 +60,39 @@ fun AttendanceScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToProgress: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToNewAttendance: (String) -> Unit,
-    onNavigateToAttendanceDetail: (String, String, String) -> Unit,
+    onNavigateToNewAttendance: () -> Unit,
+    onNavigateToAttendanceDetail: (Long, String) -> Unit,
     viewModel: AttendanceViewModel = koinViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val selectedDate by viewModel.selectedDate.collectAsState()
+    val listUiState by viewModel.listUiState.collectAsState()
+    val selectedStartDate by viewModel.selectedStartDate.collectAsState()
 
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
-    // Load classes for initial date
     LaunchedEffect(Unit) {
-        viewModel.loadClassesForDate("2026-01-29") // Today
+        viewModel.loadAttendancesForToday()
     }
 
-    // Load classes when date picker selection changes
     LaunchedEffect(datePickerState.selectedDateMillis) {
-        // For now, just use hardcoded dates for testing
-        // When user picks a date, show the mock data for 2026-01-27
-        if (datePickerState.selectedDateMillis != null) {
-            viewModel.loadClassesForDate("2026-01-27")
+        datePickerState.selectedDateMillis?.let { millis ->
+            // Convert milliseconds to LocalDate without using Instant
+            val seconds = millis / 1000
+            val days = seconds / 86400 // seconds per day
+            val epochDays = days.toInt()
+            val date = kotlinx.datetime.LocalDate.fromEpochDays(epochDays)
+            viewModel.loadAttendancesForDateRange(date, date)
         }
     }
 
     AttendanceView(
-        uiState = uiState,
-        selectedDate = selectedDate,
+        listUiState = listUiState,
+        selectedDate = selectedStartDate.toString(),
         onNavigateToHome = onNavigateToHome,
         onNavigateToProgress = onNavigateToProgress,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToNewAttendance = onNavigateToNewAttendance,
         onNavigateToAttendanceDetail = onNavigateToAttendanceDetail,
-        onDateSelected = { viewModel.loadClassesForDate(it) },
         onShowDatePicker = { showDatePicker = it }
     )
 
@@ -113,14 +113,13 @@ fun AttendanceScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AttendanceView(
-    uiState: AttendanceUiState,
+    listUiState: com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceListUiState,
     selectedDate: String,
     onNavigateToHome: () -> Unit,
     onNavigateToProgress: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToNewAttendance: (String) -> Unit,
-    onNavigateToAttendanceDetail: (String, String, String) -> Unit,
-    onDateSelected: (String) -> Unit,
+    onNavigateToNewAttendance: () -> Unit,
+    onNavigateToAttendanceDetail: (Long, String) -> Unit,
     onShowDatePicker: (Boolean) -> Unit
 ) {
     val displayDate = remember(selectedDate) {
@@ -157,7 +156,7 @@ internal fun AttendanceView(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { onNavigateToNewAttendance("6:00 PM Class") },
+                onClick = onNavigateToNewAttendance,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -181,8 +180,8 @@ internal fun AttendanceView(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            when (uiState) {
-                is AttendanceUiState.Loading -> {
+            when (listUiState) {
+                is com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceListUiState.Loading -> {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -192,24 +191,24 @@ internal fun AttendanceView(
                     }
                 }
 
-                is AttendanceUiState.Success -> {
-                    val classes = (uiState as AttendanceUiState.Success).classes
+                is com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceListUiState.Success -> {
+                    val attendances = (listUiState as com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceListUiState.Success).attendances
 
-                    if (classes.isEmpty()) {
+                    if (attendances.isEmpty()) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = "No classes found for this day",
+                                text = "No attendance records for this day",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     } else {
                         Text(
-                            text = "CLASSES FOR TODAY",
+                            text = "ATTENDANCE RECORDS",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             letterSpacing = 1.sp
@@ -218,21 +217,14 @@ internal fun AttendanceView(
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(classes) { classItem ->
-                                ClassSessionItem(
-                                    classItem = classItem,
+                            items(attendances) { attendance ->
+                                AttendanceItem(
+                                    attendance = attendance,
                                     onClick = {
-                                        if (classItem.attendanceCount > 0) {
-                                            // Has attendance - go to detail
-                                            onNavigateToAttendanceDetail(
-                                                classItem.id,
-                                                classItem.name,
-                                                selectedDate
-                                            )
-                                        } else {
-                                            // No attendance - create new
-                                            onNavigateToNewAttendance(classItem.name)
-                                        }
+                                        onNavigateToAttendanceDetail(
+                                            attendance.id,
+                                            attendance.classDate.toString()
+                                        )
                                     }
                                 )
                             }
@@ -240,14 +232,14 @@ internal fun AttendanceView(
                     }
                 }
 
-                is AttendanceUiState.Error -> {
+                is com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceListUiState.Error -> {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = (uiState as AttendanceUiState.Error).message,
+                            text = (listUiState as com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceListUiState.Error).message,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyLarge
                         )
@@ -259,8 +251,8 @@ internal fun AttendanceView(
 }
 
 @Composable
-private fun ClassSessionItem(
-    classItem: AttendanceClass,
+private fun AttendanceItem(
+    attendance: com.gma.tsunjo.school.domain.models.Attendance,
     onClick: () -> Unit
 ) {
     Card(
@@ -278,52 +270,24 @@ private fun ClassSessionItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                if (classItem.isCurrentTime) {
-                    Box(
-                        modifier = Modifier
-                            .size(4.dp, 60.dp)
-                            .background(
-                                MaterialTheme.colorScheme.primary,
-                                RoundedCornerShape(2.dp)
-                            )
-                    )
-                }
-
                 Text(
-                    text = classItem.time,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (classItem.isCurrentTime) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 18.sp
-                )
-
-                Text(
-                    text = classItem.name,
+                    text = attendance.classDate.toString(),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                
+                attendance.notes?.let { notes ->
+                    Text(
+                        text = notes,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-
-//            Row(
-//                horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                Text(
-//                    text = "${classItem.attendanceCount}/${classItem.maxCapacity}",
-//                    style = MaterialTheme.typography.titleMedium,
-//                    color = if (classItem.isCurrentTime) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-//                )
-//                Icon(
-//                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-//                    contentDescription = "View details",
-//                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-//                    modifier = Modifier.size(20.dp)
-//                )
-//            }
         }
     }
 }
@@ -360,19 +324,28 @@ private fun getDaySuffix(day: Int): String {
 private fun AttendanceScreenPreviewContent() {
     androidx.compose.material3.Surface {
         AttendanceView(
-            uiState = AttendanceUiState.Success(
+            listUiState = com.gma.tsunjo.school.features.attendance.ui.viewmodel.AttendanceListUiState.Success(
                 listOf(
-                    AttendanceClass("1", "Tsun Jo Class", "6:15 PM", "2026-01-28", 12, 20),
-                    AttendanceClass("2", "Drilss Class", "7:30 PM", "2026-01-28", 8, 15)
+                    com.gma.tsunjo.school.domain.models.Attendance(
+                        id = 1L,
+                        classDate = kotlinx.datetime.LocalDate(2026, 1, 28),
+                        notes = "Regular class",
+                        createdAt = kotlinx.datetime.LocalDateTime(2026, 1, 28, 12, 0)
+                    ),
+                    com.gma.tsunjo.school.domain.models.Attendance(
+                        id = 2L,
+                        classDate = kotlinx.datetime.LocalDate(2026, 1, 28),
+                        notes = null,
+                        createdAt = kotlinx.datetime.LocalDateTime(2026, 1, 28, 12, 0)
+                    )
                 )
             ),
             selectedDate = "2026-01-28",
             onNavigateToHome = {},
             onNavigateToProgress = {},
             onNavigateToSettings = {},
-            onNavigateToNewAttendance = { _ -> },
-            onNavigateToAttendanceDetail = { _, _, _ -> },
-            onDateSelected = { _ -> },
+            onNavigateToNewAttendance = {},
+            onNavigateToAttendanceDetail = { _, _ -> },
             onShowDatePicker = {}
         )
     }
