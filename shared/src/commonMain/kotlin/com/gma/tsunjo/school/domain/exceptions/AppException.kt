@@ -9,7 +9,7 @@ sealed class AppException(message: String, cause: Throwable? = null) : Exception
     class SessionExpired : AppException("Session has expired")
     
     // Network
-    class NetworkError(cause: Throwable? = null) : AppException("Network error occurred", cause)
+    class NetworkError : AppException("Network error occurred")
     class Timeout : AppException("Request timed out")
     class ServerError(message: String = "Server error occurred") : AppException(message)
     
