@@ -12,6 +12,7 @@ data class StudentProgressDetail(
 )
 
 data class RequirementItem(
+    val levelRequirementId: Long,
     val moveId: Long,
     val moveName: String,
     val progressId: Long?,

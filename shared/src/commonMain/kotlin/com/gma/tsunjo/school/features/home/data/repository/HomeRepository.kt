@@ -5,6 +5,7 @@
 package com.gma.tsunjo.school.features.home.data.repository
 
 import com.gma.tsunjo.school.auth.AuthenticationHandler
+import com.gma.tsunjo.school.data.remote.HttpErrorMapper
 import com.gma.tsunjo.school.features.home.data.remote.HomeApi
 import com.gma.tsunjo.school.features.home.domain.model.HomeData
 
@@ -18,7 +19,7 @@ class HomeRepository(
             Result.success(response)
         } catch (e: Exception) {
             authHandler.handleError(e)
-            Result.failure(e)
+            Result.failure(HttpErrorMapper.mapException(e))
         }
     }
 }
