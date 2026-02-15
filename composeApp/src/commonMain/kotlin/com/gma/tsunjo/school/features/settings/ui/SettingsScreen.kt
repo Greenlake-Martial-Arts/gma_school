@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -36,7 +39,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gma.tsunjo.school.AppBuildConfig
 import com.gma.tsunjo.school.features.settings.ui.viewmodel.SettingsViewModel
+import com.gma.tsunjo.school.firebase.FirebaseManager
 import com.gma.tsunjo.school.theme.GMATheme
 import com.gma.tsunjo.school.ui.components.BottomNavigationBar
 import com.gma.tsunjo.school.ui.components.SearchableTopBar
@@ -72,7 +77,8 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
@@ -101,6 +107,47 @@ fun SettingsScreen(
                         title = "Log Out",
                         onClick = { showLogoutDialog = true }
                     )
+                }
+            }
+
+            // Debug Section - Only in debug builds
+            if (AppBuildConfig.isDebug) {
+                Text(
+                    text = "Debug",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column {
+                        SettingsItem(
+                            icon = Icons.Default.BugReport,
+                            title = "Test Analytics Event",
+                            onClick = {
+                                FirebaseManager.logEvent(
+                                    "test_event",
+                                    mapOf("source" to "settings_debug")
+                                )
+                            }
+                        )
+
+                        SettingsItem(
+                            icon = Icons.Default.BugReport,
+                            title = "Trigger Crash",
+                            titleColor = MaterialTheme.colorScheme.error,
+                            iconTint = MaterialTheme.colorScheme.error,
+                            onClick = {
+                                FirebaseManager.testCrash()
+                            }
+                        )
+                    }
                 }
             }
         }

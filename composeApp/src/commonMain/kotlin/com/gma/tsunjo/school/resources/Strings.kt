@@ -30,4 +30,10 @@ object Strings {
     const val ERROR_UNAUTHORIZED = "Unauthorized access"
     const val ERROR_SESSION_EXPIRED = "Session expired. Please login again."
     const val ERROR_UNKNOWN = "An unexpected error occurred"
+    
+    // Progress Status
+    const val PROGRESS_NOT_STARTED = "Not Started"
+    const val PROGRESS_IN_PROGRESS = "In Progress"
+    const val PROGRESS_MASTERED = "Mastered"
+    const val PROGRESS_NOTES = "Notes"
 }
