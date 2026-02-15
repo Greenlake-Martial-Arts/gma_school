@@ -1,7 +1,5 @@
-TEAM_ID=
+#include "Config.xcconfig"
 
 PRODUCT_NAME=Tsun Jo
 PRODUCT_BUNDLE_IDENTIFIER=com.gma.tsunjo.school
-
-CURRENT_PROJECT_VERSION=1
-MARKETING_VERSION=1.0
+FIREBASE_PLIST_NAME=GoogleService-Info

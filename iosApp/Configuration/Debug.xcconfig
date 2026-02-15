@@ -1,0 +1,5 @@
+#include "Config.xcconfig"
+
+PRODUCT_NAME=Tsun Jo (Debug)
+PRODUCT_BUNDLE_IDENTIFIER=com.gma.tsunjo.school.debug
+FIREBASE_PLIST_NAME=GoogleService-Info-Debug

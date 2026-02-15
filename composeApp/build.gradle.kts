@@ -9,6 +9,8 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebaseCrashlytics)
 }
 
 kotlin {
@@ -31,7 +33,15 @@ kotlin {
     jvm()
 
     js {
-        browser()
+        browser {
+            // Configure dev server to use port 8082
+            commonWebpackConfig {
+                devServer = (devServer ?: org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.DevServer()).apply {
+                    port = 8082
+                    open = true
+                }
+            }
+        }
         binaries.executable()
     }
 
@@ -42,6 +52,7 @@ kotlin {
             commonWebpackConfig {
                 devServer = (devServer ?: org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.DevServer()).apply {
                     port = 8081
+                    open = true
                 }
             }
         }
@@ -52,6 +63,9 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.firebase.analytics)
+            implementation(libs.firebase.crashlytics)
+            implementation(libs.firebase.config)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -96,12 +110,19 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    buildFeatures {
+        buildConfig = true
+    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
     buildTypes {
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         getByName("release") {
             isMinifyEnabled = false
         }

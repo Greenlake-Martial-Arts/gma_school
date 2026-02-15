@@ -29,6 +29,7 @@ mysql = "8.0.33"
 hikaricp = "5.0.1"
 multiplatform-settings = "1.2.0"
 kermit = "2.0.8"
+googleServices = "4.4.4"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -87,6 +88,9 @@ multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", vers
 multiplatform-settings-noarg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatform-settings" }
 multiplatform-settings-test = { module = "com.russhwolf:multiplatform-settings-test", version.ref = "multiplatform-settings" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics", version = "22.1.2" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics", version = "19.3.0" }
+firebase-config = { module = "com.google.firebase:firebase-config", version = "22.0.1" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -98,3 +102,5 @@ kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.2" }
